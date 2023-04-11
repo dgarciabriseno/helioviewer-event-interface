@@ -15,5 +15,14 @@ We would like to make it easy to finesse external data into this format for incl
 3. The API must return fields that specify a location on the sun
 
 ## Procedure
-1. Add the API URL to the list of known data sources.
-2. Create a definition that describes how to translate data into Helioviewer's format.
+1. Add the API URL to the list of known data sources. See `src/Sources.php`
+2. Create a definition that describes how to translate data into Helioviewer's format. See `Translator/DonkiCme` as the original sample.
+
+### Notes
+Looking at `src/Sources.php` is very straightforward on adding new sources. Simply define the URI, query string date parameters, and the name of the translator file.
+
+Translators are loaded automatically.
+They do not follow psr-4 loading since they are not classes.
+You must define each unique translator in its own namespace.
+You must define a "Translate" function which accepts and array and returns an array.
+You may include other functions in the file as needed to implement your translator. They are namespaced in your translator's unique namespace so there are no conflicts.
