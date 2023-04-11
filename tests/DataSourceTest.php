@@ -22,5 +22,13 @@ final class DataSourceTest extends TestCase
         $data = $promise->wait();
         $this->assertEquals(8, count($data));
     }
+
+    public function testDonkiCme(): void
+    {
+        $datasource = new DataSource("Donki", "https://kauai.ccmc.gsfc.nasa.gov/DONKI/WS/get/CME", "startDate", "endDate", "Y-m-d", "DonkiCme");
+        $promise = $datasource->getAsync($this->START_DATE, $this->END_DATE);
+        $data = $promise->wait();
+        $this->assertEquals(0, count($data));
+    }
 }
 
