@@ -1,5 +1,9 @@
 # Helioviewer Event Interface
-The Helioviewer Event Interface's mission is to provide a the tools and interface to make it as easy as possible to integrate new feature & event data sources into helioviewer.org
+The Helioviewer Event Interface's mission is to provide a the tools and interface to make it as easy as possible to integrate new feature & event data sources into helioviewer.org.
+
+This module managers performing the external HTTP requests and passing that data over to the relevant translator which converts the data into the appropriate format.
+It also provides a standard framework to follow for translating one object into Helioviewer.
+Finally, it manages querying these external data sources which makes this the place to perform optimizations for caching, making simultaneous requests, etc.
 
 # Why?
 Helioviewer's [Event Format](https://api.helioviewer.org/docs/v2/appendix/helioviewer_event_format.html) provides a standard object that helioviewer.org can parse and understand without any modifications to the application.
