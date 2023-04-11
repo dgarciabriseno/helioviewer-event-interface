@@ -2,6 +2,9 @@
 
 namespace HelioviewerEventInterface\Translator;
 
+/**
+ * Test translator that does nothing but return the data as-is
+ */
 function Translate(array $data): array {
-    return [];
+    return $data;
 }

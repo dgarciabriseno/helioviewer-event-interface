@@ -57,7 +57,10 @@ class DataSource {
         return $promise->then(
             // Decode the json result on a successful request
             function (ResponseInterface $response) {
-                return json_decode($response->getBody()->getContents());
+                $data = json_decode($response->getBody()->getContents());
+                // Load the requested translator and execute it
+                include_once __DIR__ . "/Translator/" . $this->translator . ".php";
+                return Translator\Translate($data);
             },
             // Fail gracefully on failure by logging the result and returning an empty list representing no data available from this source.
             function (RequestException $e) {
