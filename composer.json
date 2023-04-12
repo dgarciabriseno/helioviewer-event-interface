@@ -1,4 +1,6 @@
 {
+    "name": "helioviewer/event-interface",
+    "type": "library",
     "autoload": {
         "psr-4": {"HelioviewerEventInterface\\": "src/"}
     },
