@@ -4,6 +4,8 @@ namespace HelioviewerEventInterface;
 
 use DateTimeInterface;
 
+use const HelioviewerEventInterface\SOURCES;
+
 /**
  * The entry point for querying all events provided by this event interface module
  */
