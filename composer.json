@@ -6,6 +6,7 @@
         "phpunit/phpunit": "^10"
     },
     "require": {
-        "guzzlehttp/guzzle": "^7.5"
+        "guzzlehttp/guzzle": "^7.5",
+        "mark-gerarts/auto-mapper-plus": "^1.4.1"
     }
 }

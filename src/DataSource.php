@@ -57,7 +57,7 @@ class DataSource {
         return $promise->then(
             // Decode the json result on a successful request
             function (ResponseInterface $response) {
-                $data = json_decode($response->getBody()->getContents());
+                $data = json_decode($response->getBody()->getContents(), true);
                 // Load the requested translator and execute it
                 include_once __DIR__ . "/Translator/" . $this->translator . ".php";
                 // Ah yes, indulge in string execution.
