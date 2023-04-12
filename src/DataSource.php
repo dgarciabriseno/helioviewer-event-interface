@@ -2,7 +2,7 @@
 
 namespace HelioviewerEventInterface;
 
-use \DateTime;
+use \DateTimeInterface;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Promise\PromiseInterface;
@@ -45,11 +45,11 @@ class DataSource {
     /**
      * Queries the data source asynchronously for relevant data between the start and end times.
      * Use getResult() to get the response from the last query.
-     * @param DateTime $start Start of time range
-     * @param DateTime $end End of time range
+     * @param DateTimeInterface $start Start of time range
+     * @param DateTimeInterface $end End of time range
      * @return PromiseInterface
      */
-    public function beginQuery(DateTime $start, DateTime $end) {
+    public function beginQuery(DateTimeInterface $start, DateTimeInterface $end) {
         // Convert input dates to strings
         $startString = $start->format($this->dateFormat);
         $endString = $end->format($this->dateFormat);

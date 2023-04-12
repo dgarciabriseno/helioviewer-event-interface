@@ -2,7 +2,7 @@
 
 namespace HelioviewerEventInterface;
 
-use \DateTime;
+use DateTimeInterface;
 
 /**
  * The entry point for querying all events provided by this event interface module
@@ -12,7 +12,7 @@ class Events
     /**
      * Returns all data provided by the event interface.
      */
-    public static function GetAll(DateTime $start, DateTime $end, array $sources = null): array {
+    public static function GetAll(DateTimeInterface $start, DateTimeInterface $end, array $sources = null): array {
         if (is_null($sources)) {
             $sources = SOURCES;
         }
@@ -26,7 +26,7 @@ class Events
      * Returns an array of promises.
      * @TODO: In the future if we have a lot of promises, we should use a request pool.
      */
-    private static function SendAsyncQueries(DateTime $start, DateTime $end, array $sources): array {
+    private static function SendAsyncQueries(DateTimeInterface $start, DateTimeInterface $end, array $sources): array {
         $promises = [];
         // Send off each request asynchronously
         foreach ($sources as $dataSource) {
