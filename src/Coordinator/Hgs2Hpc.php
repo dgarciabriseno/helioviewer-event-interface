@@ -1,5 +1,9 @@
 <?php declare(strict_types=1);
 
+namespace HelioviewerEventInterface\Coordinator;
+
+use \Socket;
+
 class Hgs2Hpc {
     private Socket $socket;
     private bool $connected = false;
@@ -9,6 +13,7 @@ class Hgs2Hpc {
 
     function __destruct() {
         if ($this->connected) {
+            socket_write($this->socket, "quit");
             socket_shutdown($this->socket);
             socket_close($this->socket);
         }

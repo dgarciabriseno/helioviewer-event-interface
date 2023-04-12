@@ -14,11 +14,11 @@ class Events
     /**
      * Returns all data provided by the event interface.
      */
-    public static function GetAll(DateTimeInterface $start, DateTimeInterface $end, array $sources = null): array {
+    public static function GetAll(DateTimeInterface $start, DateTimeInterface $end, ?callable $postprocessor = null, array $sources = null): array {
         if (is_null($sources)) {
             $sources = Sources::All();
         }
-        $requests = Events::SendAsyncQueries($start, $end, $sources);
+        $requests = Events::SendAsyncQueries($start, $end, $sources, $postprocessor);
         $results = Events::WaitForCompletion($requests);
         return Events::AggregateResults($results);
     }
@@ -28,11 +28,11 @@ class Events
      * Returns an array of promises.
      * @TODO: In the future if we have a lot of promises, we should use a request pool.
      */
-    private static function SendAsyncQueries(DateTimeInterface $start, DateTimeInterface $end, array $sources): array {
+    private static function SendAsyncQueries(DateTimeInterface $start, DateTimeInterface $end, array $sources, ?callable $postprocessor): array {
         $promises = [];
         // Send off each request asynchronously
         foreach ($sources as $dataSource) {
-            $dataSource->beginQuery($start, $end);
+            $dataSource->beginQuery($start, $end, $postprocessor);
             array_push($promises, $dataSource);
         }
         return $promises;

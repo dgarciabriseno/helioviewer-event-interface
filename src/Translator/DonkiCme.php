@@ -5,11 +5,12 @@ namespace HelioviewerEventInterface\DonkiCme;
 use \DateInterval;
 use \DateTimeImmutable;
 use HelioviewerEventInterface\Types\HelioviewerEvent;
+use HelioviewerEventInterface\Coordinator\Hgs2Hpc;
 use AutoMapperPlus\Configuration\AutoMapperConfig;
 use AutoMapperPlus\AutoMapper;
 use AutoMapperPlus\MappingOperation\Operation;
 
-function Translate(array $data): array {
+function Translate(array $data, ?callable $postProcessor): array {
     $group = [
         'name' => 'CME',
         'contact' => 'Space Weather Database of NOtifications, Knowledge, Information (DONKI)',
@@ -17,17 +18,21 @@ function Translate(array $data): array {
         'data' => []
     ];
 
+    // Breaking encapsulation a bit... but creating one overall Hgs2Hpc instance means it will reuse the socket connection for each record.
+    // This should give a slight performance improvement since it doesn't need to create a new connection for each record.
+    $hgs2hpc = new Hgs2Hpc();
     foreach ($data as $record) {
-        array_push($group['data'], TranslateCME($record));
+        array_push($group['data'], TranslateCME($record, $hgs2hpc, $postProcessor));
     }
     return $group;
 }
 
-function TranslateCME(array $record): HelioviewerEvent {
+function TranslateCME(array $record, Hgs2Hpc $hgs2hpc, ?callable $postProcessor): HelioviewerEvent {
     $config = new AutoMapperConfig();
     $start = new DateTimeImmutable($record['startTime']);
     $end = $start->add(new DateInterval("P1D"));
     $cme = new DonkiCme($record);
+    $hpc = $hgs2hpc->convert($cme->latitude, $cme->longitude, $start->format('Y-m-d\TH:i:s\Z'));
     $config->registerMapping('array', HelioviewerEvent::class)
         ->forMember('id', Operation::fromProperty('activityID'))
         ->forMember('label', Operation::setTo($cme->label()))
@@ -35,10 +40,13 @@ function TranslateCME(array $record): HelioviewerEvent {
         ->forMember('type', Operation::setTo('CE'))
         ->forMember('start', Operation::setTo($start->format('Y-m-d H:i:s')))
         ->forMember('end', Operation::setTo($end->format('Y-m-d H:i:s')))
-        ->forMember('latitude', Operation::setTo($cme->latitude))
-        ->forMember('longitude', Operation::setTo($cme->longitude));
+        ->forMember('hpc_x', Operation::setTo($hpc['x']))
+        ->forMember('hpc_y', Operation::setTo($hpc['y']));
     $mapper = new AutoMapper($config);
     $event = $mapper->map($record, HelioviewerEvent::class);
+    if (isset($postProcessor)) {
+        $event = $postProcessor($event);
+    }
     $event->source = $record;
     return $event;
 }

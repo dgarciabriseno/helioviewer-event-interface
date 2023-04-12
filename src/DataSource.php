@@ -47,9 +47,10 @@ class DataSource {
      * Use getResult() to get the response from the last query.
      * @param DateTimeInterface $start Start of time range
      * @param DateTimeInterface $end End of time range
+     * @param callable $postprocessor Executable function to call on each Helioviewer Event processed during the query
      * @return PromiseInterface
      */
-    public function beginQuery(DateTimeInterface $start, DateTimeInterface $end) {
+    public function beginQuery(DateTimeInterface $start, DateTimeInterface $end, ?callable $postprocessor) {
         // Convert input dates to strings
         $startString = $start->format($this->dateFormat);
         $endString = $end->format($this->dateFormat);
@@ -61,12 +62,12 @@ class DataSource {
         ]);
         $this->request = $promise->then(
             // Decode the json result on a successful request
-            function (ResponseInterface $response) {
+            function (ResponseInterface $response) use ($postprocessor) {
                 $data = json_decode($response->getBody()->getContents(), true);
                 // Load the requested translator and execute it
                 include_once __DIR__ . "/Translator/" . $this->translator . ".php";
                 // Ah yes, indulge in string execution.
-                return "HelioviewerEventInterface\\$this->translator\\Translate"($data);
+                return "HelioviewerEventInterface\\$this->translator\\Translate"($data, $postprocessor);
             },
             // Fail gracefully on failure by logging the result and returning an empty list representing no data available from this source.
             function (RequestException $e) {

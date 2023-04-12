@@ -11,6 +11,9 @@ class HelioviewerEvent
     public string $start;      // Required
     public string $end;        // Required
     public array $source;      // Required
-    public float $latitude;   // Optional
-    public float $longitude;  // Optional
+    public float $hpc_x;       // Required
+    public float $hpc_y;       // Required
+
+    public float $hv_hpc_x;    // Reserved
+    public float $hv_hpc_y;    // Reserved
 }
