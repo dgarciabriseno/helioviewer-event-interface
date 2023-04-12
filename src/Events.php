@@ -4,7 +4,7 @@ namespace HelioviewerEventInterface;
 
 use DateTimeInterface;
 
-use const HelioviewerEventInterface\SOURCES;
+use HelioviewerEventInterface\Sources;
 
 /**
  * The entry point for querying all events provided by this event interface module
@@ -16,7 +16,7 @@ class Events
      */
     public static function GetAll(DateTimeInterface $start, DateTimeInterface $end, array $sources = null): array {
         if (is_null($sources)) {
-            $sources = SOURCES;
+            $sources = Sources::All();
         }
         $requests = Events::SendAsyncQueries($start, $end, $sources);
         $results = Events::WaitForCompletion($requests);
