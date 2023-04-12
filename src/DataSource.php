@@ -14,23 +14,27 @@ use Psr\Http\Message\ResponseInterface;
  */
 class DataSource {
     public string $name;
+    public string $pin;
     protected string $uri;
     protected string $startName;
     protected string $endName;
     protected string $dateFormat;
     protected string $translator;
+    private PromiseInterface $request;
 
     /**
      * Creates a new DataSource instance
-     * @param string $name The name of this data source.
+     * @param string $name The name of the source data. It's okay for this to be a duplicate of other sources
+     * @param string $pin The pin to use for this specific resource
      * @param string $url The url of for the source's API.
      * @param string $startName The query string parameter name for the start date.
      * @param string $endName The query string parameter name for the end date.
      * @param string $dateFormat The format to use for the dates.
      * @param string $translator The name of the translator class to use for this data source.
      */
-    public function __construct(string $name, string $uri, string $startName, string $endName, string $dateFormat, string $translator) {
+    public function __construct(string $name, string $pin, string $uri, string $startName, string $endName, string $dateFormat, string $translator) {
         $this->name = $name;
+        $this->pin = $pin;
         $this->uri = $uri;
         $this->startName = $startName;
         $this->endName = $endName;
@@ -40,11 +44,12 @@ class DataSource {
 
     /**
      * Queries the data source asynchronously for relevant data between the start and end times.
+     * Use getResult() to get the response from the last query.
      * @param DateTime $start Start of time range
      * @param DateTime $end End of time range
      * @return PromiseInterface
      */
-    public function getAsync(DateTime $start, DateTime $end): PromiseInterface {
+    public function beginQuery(DateTime $start, DateTime $end) {
         // Convert input dates to strings
         $startString = $start->format($this->dateFormat);
         $endString = $end->format($this->dateFormat);
@@ -54,7 +59,7 @@ class DataSource {
         $promise = $client->requestAsync('GET', '', [
             'query' => [$this->startName => $startString, $this->endName => $endString]
         ]);
-        return $promise->then(
+        $this->request = $promise->then(
             // Decode the json result on a successful request
             function (ResponseInterface $response) {
                 $data = json_decode($response->getBody()->getContents(), true);
@@ -69,5 +74,26 @@ class DataSource {
                 return [];
             }
         );
+    }
+
+    /**
+     * Returns the result from the last query started with beginQuery
+     * This will block if the request is still ongoing.
+     */
+    public function getResult(): array {
+        if (isset($this->request)) {
+            $group = $this->request->wait();
+            return $this->BuildEventCategory($group);
+        }
+        error_log("Attempted to get the result without calling beginQuery");
+        return [];
+    }
+
+    private function BuildEventCategory(array $group): array {
+        return [
+            'name' => $this->name,
+            'pin' => $this->pin,
+            'groups' => [$group]
+        ];
     }
 }
