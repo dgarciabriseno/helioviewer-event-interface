@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
 This module provides a server which accepts an observation time, latitude, and longitude (Heliographic Stonyhurst, hgs) and converts them into helioprojective coordinates (hpc).
 """
