@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+if [ ! -S "/tmp/hgs2hpc.sock" ]
+then
+    nohup $SCRIPT_DIR/hgs2hpc.py &
+    echo [$(date)]: "Started hgs2hpc server"
+fi
