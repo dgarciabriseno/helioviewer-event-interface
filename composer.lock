@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "941efcdffaccc7cdfaf64c77ba249f70",
+    "content-hash": "1702b056efddf1b660701a0521c36251",
     "packages": [
         {
             "name": "guzzlehttp/guzzle",
@@ -336,57 +336,6 @@
                 }
             ],
             "time": "2023-03-09T13:19:02+00:00"
-        },
-        {
-            "name": "mark-gerarts/auto-mapper-plus",
-            "version": "1.4.1",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/mark-gerarts/automapper-plus.git",
-                "reference": "2c14575a51377c31f4efea48f89f3fe0530b499a"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/mark-gerarts/automapper-plus/zipball/2c14575a51377c31f4efea48f89f3fe0530b499a",
-                "reference": "2c14575a51377c31f4efea48f89f3fe0530b499a",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=7.4.0"
-            },
-            "require-dev": {
-                "mark-gerarts/phpstan-automapper-plus": "^0.1.0",
-                "phpunit/phpunit": "^7.0|^8.0",
-                "symfony/debug": "^3.3",
-                "symfony/var-dumper": "^3.3"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "AutoMapperPlus\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Mark Gerarts",
-                    "email": "mark.gerarts@gmail.com"
-                }
-            ],
-            "description": "An AutoMapper for PHP",
-            "keywords": [
-                "automapper",
-                "converter",
-                "object-to-object"
-            ],
-            "support": {
-                "issues": "https://github.com/mark-gerarts/automapper-plus/issues",
-                "source": "https://github.com/mark-gerarts/automapper-plus/tree/1.4.1"
-            },
-            "time": "2023-01-31T08:07:09+00:00"
         },
         {
             "name": "psr/http-client",
@@ -889,16 +838,16 @@
         },
         {
             "name": "phpunit/php-code-coverage",
-            "version": "10.0.2",
+            "version": "10.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/php-code-coverage.git",
-                "reference": "20800e84296ea4732f9a125e08ce86b4004ae3e4"
+                "reference": "fc4f5ee614fa82d50ecf9014b51af0a9561f3df8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/php-code-coverage/zipball/20800e84296ea4732f9a125e08ce86b4004ae3e4",
-                "reference": "20800e84296ea4732f9a125e08ce86b4004ae3e4",
+                "url": "https://api.github.com/repos/sebastianbergmann/php-code-coverage/zipball/fc4f5ee614fa82d50ecf9014b51af0a9561f3df8",
+                "reference": "fc4f5ee614fa82d50ecf9014b51af0a9561f3df8",
                 "shasum": ""
             },
             "require": {
@@ -926,7 +875,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-main": "10.0-dev"
+                    "dev-main": "10.1-dev"
                 }
             },
             "autoload": {
@@ -954,7 +903,8 @@
             ],
             "support": {
                 "issues": "https://github.com/sebastianbergmann/php-code-coverage/issues",
-                "source": "https://github.com/sebastianbergmann/php-code-coverage/tree/10.0.2"
+                "security": "https://github.com/sebastianbergmann/php-code-coverage/security/policy",
+                "source": "https://github.com/sebastianbergmann/php-code-coverage/tree/10.1.0"
             },
             "funding": [
                 {
@@ -962,7 +912,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2023-03-06T13:00:19+00:00"
+            "time": "2023-04-13T07:08:27+00:00"
         },
         {
             "name": "phpunit/php-file-iterator",

@@ -6,9 +6,6 @@ use \DateInterval;
 use \DateTimeImmutable;
 use HelioviewerEventInterface\Types\HelioviewerEvent;
 use HelioviewerEventInterface\Coordinator\Hgs2Hpc;
-use AutoMapperPlus\Configuration\AutoMapperConfig;
-use AutoMapperPlus\AutoMapper;
-use AutoMapperPlus\MappingOperation\Operation;
 
 function Translate(array $data, ?callable $postProcessor): array {
     $group = [
@@ -28,25 +25,25 @@ function Translate(array $data, ?callable $postProcessor): array {
 }
 
 function TranslateCME(array $record, Hgs2Hpc $hgs2hpc, ?callable $postProcessor): HelioviewerEvent {
-    $config = new AutoMapperConfig();
     $start = new DateTimeImmutable($record['startTime']);
     $end = $start->add(new DateInterval("P1D"));
     $cme = new DonkiCme($record);
     $hpc = $hgs2hpc->convert($cme->latitude, $cme->longitude, $start->format('Y-m-d\TH:i:s\Z'));
-    $config->registerMapping('array', HelioviewerEvent::class)
-        ->forMember('id', Operation::fromProperty('activityID'))
-        ->forMember('label', Operation::setTo($cme->label()))
-        ->forMember('version', Operation::fromProperty('catalog'))
-        ->forMember('type', Operation::setTo('CE'))
-        ->forMember('start', Operation::setTo($start->format('Y-m-d H:i:s')))
-        ->forMember('end', Operation::setTo($end->format('Y-m-d H:i:s')))
-        ->forMember('hpc_x', Operation::setTo($hpc['x']))
-        ->forMember('hpc_y', Operation::setTo($hpc['y']));
-    $mapper = new AutoMapper($config);
-    $event = $mapper->map($record, HelioviewerEvent::class);
+
+    $event = new HelioviewerEvent();
+    $event['id']      = $event['activityID'];
+    $event['label']   = $cme->label();
+    $event['version'] = $event['catalog'];
+    $event['type']    = 'CE';
+    $event['start']   = $start->format('Y-m-d H:i:s');
+    $event['end']     = $end->format('Y-m-d H:i:s');
+    $event['hpc_x']   = $hpc['x'];
+    $event['hpc_y']   = $hpc['y'];
+
     if (isset($postProcessor)) {
         $event = $postProcessor($event);
     }
+
     $event->source = $record;
     return $event;
 }
