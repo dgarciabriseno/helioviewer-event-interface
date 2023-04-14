@@ -31,14 +31,14 @@ function TranslateCME(array $record, Hgs2Hpc $hgs2hpc, ?callable $postProcessor)
     $hpc = $hgs2hpc->convert($cme->latitude, $cme->longitude, $start->format('Y-m-d\TH:i:s\Z'));
 
     $event = new HelioviewerEvent();
-    $event['id']      = $event['activityID'];
-    $event['label']   = $cme->label();
-    $event['version'] = $event['catalog'];
-    $event['type']    = 'CE';
-    $event['start']   = $start->format('Y-m-d H:i:s');
-    $event['end']     = $end->format('Y-m-d H:i:s');
-    $event['hpc_x']   = $hpc['x'];
-    $event['hpc_y']   = $hpc['y'];
+    $event->id      = $record['activityID'];
+    $event->label   = $cme->label();
+    $event->version = $record['catalog'];
+    $event->type    = 'CE';
+    $event->start   = $start->format('Y-m-d H:i:s');
+    $event->end     = $end->format('Y-m-d H:i:s');
+    $event->hpc_x   = $hpc['x'];
+    $event->hpc_y   = $hpc['y'];
 
     if (isset($postProcessor)) {
         $event = $postProcessor($event);

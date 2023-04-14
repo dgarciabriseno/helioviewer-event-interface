@@ -52,7 +52,7 @@ class DataSource {
      * @param callable $postprocessor Executable function to call on each Helioviewer Event processed during the query
      * @return PromiseInterface
      */
-    public function beginQuery(DateTimeInterface $start, DateTimeInterface $end, ?callable $postprocessor) {
+    public function beginQuery(DateTimeInterface $start, DateTimeInterface $end, ?callable $postprocessor = null) {
         // Convert input dates to strings
         $startString = $start->format($this->dateFormat);
         $endString = $end->format($this->dateFormat);

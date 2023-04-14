@@ -17,7 +17,7 @@ final class DataSourceTest extends TestCase
     public function testAsyncQuery(): void
     {
         // Test via the DONKI CME data source
-        $datasource = new DataSource("Donki", "CE", "https://kauai.ccmc.gsfc.nasa.gov/DONKI/WS/get/CME", "startDate", "endDate", "Y-m-d", "NopTranslator");
+        $datasource = new DataSource("DONKI", "CME", "CE", "https://kauai.ccmc.gsfc.nasa.gov/DONKI/WS/get/CME", "startDate", "endDate", "Y-m-d", "NopTranslator");
         $datasource->beginQuery($this->START_DATE, $this->END_DATE);
         $data = $datasource->getResult();
         // Normally the translator returns helioviewer groups, but in this case since we're using the NopTranslator it just returns the data as-is.
@@ -27,7 +27,7 @@ final class DataSourceTest extends TestCase
 
     public function testDonkiCme(): void
     {
-        $datasource = new DataSource("Donki", "CE", "https://kauai.ccmc.gsfc.nasa.gov/DONKI/WS/get/CME", "startDate", "endDate", "Y-m-d", "DonkiCme");
+        $datasource = new DataSource("Donki", "CME", "CE", "https://kauai.ccmc.gsfc.nasa.gov/DONKI/WS/get/CME", "startDate", "endDate", "Y-m-d", "DonkiCme");
         $datasource->beginQuery($this->START_DATE, $this->END_DATE);
         $group = $datasource->getResult();
         // Here it runs through the DonkiCme translator, so it should actually be in the correct event format.

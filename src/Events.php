@@ -18,6 +18,22 @@ class Events
         if (is_null($sources)) {
             $sources = Sources::All();
         }
+        return Events::Get($start, $end, $sources, $postprocessor);
+    }
+
+    /**
+     * Retrieves events from the given data sources
+     * @param array $sources Array of strings that name the sources to query.
+     */
+    public static function GetFromSource(array $sources, DateTimeInterface $start, DateTimeInterface $end, ?callable $postprocessor = null): array {
+        $sources = Sources::FromArray($sources);
+        return Events::Get($start, $end, $sources, $postprocessor);
+    }
+
+    /**
+     * Retrieves events from the given source list
+     */
+    private static function Get(DateTimeInterface $start, DateTimeInterface $end, array $sources, ?callable $postprocessor): array {
         $requests = Events::SendAsyncQueries($start, $end, $sources, $postprocessor);
         $results = Events::WaitForCompletion($requests);
         return Events::AggregateResults($results);
