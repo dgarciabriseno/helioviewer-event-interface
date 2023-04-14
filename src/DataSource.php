@@ -94,14 +94,18 @@ class DataSource {
             return $this->BuildEventCategory($group);
         }
         error_log("Attempted to get the result without calling beginQuery");
-        return [];
+        return $this->BuildEventCategory(null);
     }
 
-    private function BuildEventCategory(array $group): array {
-        return [
+    private function BuildEventCategory(?array $group): array {
+        $frame = [
             'name' => $this->name,
             'pin' => $this->pin,
-            'groups' => [$group]
+            'groups' => []
         ];
+        if (isset($group) && (count($group) > 0)) {
+            array_push($frame['groups'], $group);
+        }
+        return $frame;
     }
 }

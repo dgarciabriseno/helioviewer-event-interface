@@ -33,5 +33,15 @@ final class DataSourceTest extends TestCase
         // Here it runs through the DonkiCme translator, so it should actually be in the correct event format.
         $this->assertEquals(8, count($group['groups'][0]['data']));
     }
+
+    public function testQueryWithNoData(): void {
+        $start = new DateTimeImmutable("2019-09-05T18:20:28Z");
+        $end = new DateTimeImmutable("2019-09-05T18:20:28Z");
+
+        $datasource = new DataSource("Donki", "CME", "CE", "https://kauai.ccmc.gsfc.nasa.gov/DONKI/WS/get/CME", "startDate", "endDate", "Y-m-d", "DonkiCme");
+        $datasource->beginQuery($start, $end);
+        $group = $datasource->getResult();
+        $this->assertCount(0, $group['groups']);
+    }
 }
 
