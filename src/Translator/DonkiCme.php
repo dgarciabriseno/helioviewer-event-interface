@@ -4,6 +4,7 @@ namespace HelioviewerEventInterface\DonkiCme;
 
 use \DateInterval;
 use \DateTimeImmutable;
+use \Throwable;
 use HelioviewerEventInterface\Types\HelioviewerEvent;
 use HelioviewerEventInterface\Coordinator\Hgs2Hpc;
 
@@ -19,7 +20,14 @@ function Translate(array $data, ?callable $postProcessor): array {
     // This should give a slight performance improvement since it doesn't need to create a new connection for each record.
     $hgs2hpc = new Hgs2Hpc();
     foreach ($data as $record) {
-        array_push($group['data'], TranslateCME($record, $hgs2hpc, $postProcessor));
+        try {
+            $cme = TranslateCME($record, $hgs2hpc, $postProcessor);
+            array_push($group['data'], $cme);
+        } catch (Throwable $e) {
+            error_log("Failed to parse the following CME record: " . $e->getMessage());
+            error_log(json_encode($record));
+            continue;
+        }
     }
     return $group;
 }
