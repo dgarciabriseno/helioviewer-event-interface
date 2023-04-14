@@ -4,9 +4,12 @@ namespace HelioviewerEventInterface\DonkiCme;
 
 use \DateInterval;
 use \DateTimeImmutable;
+use \Exception;
 use \Throwable;
 use HelioviewerEventInterface\Types\HelioviewerEvent;
 use HelioviewerEventInterface\Coordinator\Hgs2Hpc;
+
+class IgnoreCme extends Exception {}
 
 function Translate(array $data, ?callable $postProcessor): array {
     $group = [
@@ -23,7 +26,11 @@ function Translate(array $data, ?callable $postProcessor): array {
         try {
             $cme = TranslateCME($record, $hgs2hpc, $postProcessor);
             array_push($group['data'], $cme);
-        } catch (Throwable $e) {
+        }
+        catch (IgnoreCme) {
+            continue;
+        }
+        catch (Throwable $e) {
             error_log("Failed to parse the following CME record: " . $e->getMessage());
             error_log(json_encode($record));
             continue;
@@ -73,6 +80,9 @@ class DonkiCme {
         // First try to get the latitude longitude from the given analysis
         $analysis = $this->mostAccurateAnalysis();
         if (isset($analysis)) {
+            if (is_null($analysis['latitude']) || is_null($analysis['longitude'])) {
+                throw new IgnoreCme("Unknown location, can't display on Helioviewer");
+            }
             $this->latitude = $analysis['latitude'];
             $this->longitude = $analysis['longitude'];
             return;
