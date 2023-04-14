@@ -13,5 +13,13 @@ final class DonkiCmeTest extends TestCase
         $result = Events::GetFromSource(["DONKI"], $start, $end);
         $this->assertNotNull($result);
     }
+
+    public function testQueryWithNoData(): void {
+        $start = new DateTimeImmutable("2019-09-05T18:20:28Z");
+        $end = new DateTimeImmutable("2019-09-05T18:20:28Z");
+
+        $result = Events::GetFromSource(["DONKI"], $start, $end);
+        $this->assertNotNull($result);
+    }
 }
 

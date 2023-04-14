@@ -66,10 +66,15 @@ class DataSource {
             // Decode the json result on a successful request
             function (ResponseInterface $response) use ($postprocessor) {
                 $data = json_decode($response->getBody()->getContents(), true);
-                // Load the requested translator and execute it
-                include_once __DIR__ . "/Translator/" . $this->translator . ".php";
-                // Ah yes, indulge in string execution.
-                return "HelioviewerEventInterface\\$this->translator\\Translate"($data, $postprocessor);
+                if (isset($data)) {
+                    // Load the requested translator and execute it
+                    include_once __DIR__ . "/Translator/" . $this->translator . ".php";
+                    // Ah yes, indulge in string execution.
+                    return "HelioviewerEventInterface\\$this->translator\\Translate"($data, $postprocessor);
+                } else {
+                    // If data is null, then there's no data for the query, return an empty list.
+                    return [];
+                }
             },
             // Fail gracefully on failure by logging the result and returning an empty list representing no data available from this source.
             function (RequestException $e) {
