@@ -1,7 +1,9 @@
 {
     "name": "helioviewer/event-interface",
+    "description": "Interface for querying external data sources for Helioviewer",
     "type": "library",
     "bin": ["bin/hgs2hpc.py", "bin/start_hgs2hpc"],
+    "license": "MPL-2.0",
     "scripts": {
         "test": "vendor/bin/phpunit tests"
     },
