@@ -22,9 +22,9 @@ def hgs2hpc_thread(connection):
     while True:
         message = connection.recv(1024).decode('utf-8').strip()
         if message == "quit":
-            connection.shutdown(socket.SHUT_RDWR)
+            connection.sendall("ok".encode('utf-8'))
             connection.close()
-            break
+            return
         else:
             try:
                 split = message.split(' ')

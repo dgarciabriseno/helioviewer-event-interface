@@ -12,10 +12,15 @@ class Hgs2Hpc {
     }
 
     function __destruct() {
+        $this->close();
+    }
+
+    public function close() {
         if ($this->connected) {
-            socket_write($this->socket, "quit");
-            socket_shutdown($this->socket);
+            $this->write("quit");
+            socket_read($this->socket, 2);
             socket_close($this->socket);
+            $this->connected = false;
         }
     }
 
