@@ -125,9 +125,11 @@ class DonkiCme {
     public function mostAccurateAnalysis() {
         if (array_key_exists('cmeAnalyses', $this->data)) {
             $cmeAnalyses = $this->data['cmeAnalyses'];
-            foreach ($cmeAnalyses as $analysis) {
-                if ($analysis['isMostAccurate']) {
-                    return $analysis;
+            if (isset($cmeAnalyses)) {
+                foreach ($cmeAnalyses as $analysis) {
+                    if ($analysis['isMostAccurate']) {
+                        return $analysis;
+                    }
                 }
             }
         }
