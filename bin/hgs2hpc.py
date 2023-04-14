@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """
 This module provides a server which accepts an observation time, latitude, and longitude (Heliographic Stonyhurst, hgs) and converts them into helioprojective coordinates (hpc).
 """
@@ -8,8 +7,13 @@ from sunpy.coordinates import frames
 from multiprocessing import Process
 import astropy.units as u
 import atexit
+import logging
 import socket
 import os
+
+logging.basicConfig(format='%(asctime)s: %(message)s')
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 # This is really all we want to run. But there's way too much python overhead to call this for each coordinate.
 # Instead, we create a unix socket and then php can connect to it and send the coordinates to be converted.
@@ -27,6 +31,7 @@ def hgs2hpc_thread(connection):
             return
         else:
             try:
+                logger.info(f"Processing '{message}'")
                 split = message.split(' ')
                 result = get_hpc(float(split[0]), float(split[1]), split[2])
                 connection.sendall(result.encode('utf-8'))
