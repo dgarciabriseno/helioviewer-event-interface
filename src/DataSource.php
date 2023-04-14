@@ -13,6 +13,7 @@ use Psr\Http\Message\ResponseInterface;
  * This class defines methods to query data from an external datasource given the appropriate metadata.
  */
 class DataSource {
+    public string $source;
     public string $name;
     public string $pin;
     protected string $uri;
@@ -32,7 +33,8 @@ class DataSource {
      * @param string $dateFormat The format to use for the dates.
      * @param string $translator The name of the translator class to use for this data source.
      */
-    public function __construct(string $name, string $pin, string $uri, string $startName, string $endName, string $dateFormat, string $translator) {
+    public function __construct(string $source, string $name, string $pin, string $uri, string $startName, string $endName, string $dateFormat, string $translator) {
+        $this->source = $source;
         $this->name = $name;
         $this->pin = $pin;
         $this->uri = $uri;
