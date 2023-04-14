@@ -2,6 +2,9 @@
     "name": "helioviewer/event-interface",
     "type": "library",
     "bin": ["bin/hgs2hpc.py", "bin/start_hgs2hpc"],
+    "scripts": {
+        "test": "vendor/bin/phpunit tests"
+    },
     "autoload": {
         "psr-4": {"HelioviewerEventInterface\\": "src/"}
     },
