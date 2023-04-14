@@ -10,7 +10,7 @@ use HelioviewerEventInterface\DataSource;
 class Sources {
     public static function All() {
         return [
-            new DataSource("DONKI", "Coronal Mass Ejection", "C3", "https://kauai.ccmc.gsfc.nasa.gov/DONKI/WS/get/CME", "startDate", "endDate", "Y-m-d", "DonkiCme"),
+            new DataSource("DONKI", "Coronal Mass Ejection", "CE", "https://kauai.ccmc.gsfc.nasa.gov/DONKI/WS/get/CME", "startDate", "endDate", "Y-m-d", "DonkiCme"),
         ];
     }
 
