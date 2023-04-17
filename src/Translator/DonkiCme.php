@@ -8,6 +8,7 @@ use \Exception;
 use \Throwable;
 use HelioviewerEventInterface\Types\HelioviewerEvent;
 use HelioviewerEventInterface\Coordinator\Hgs2Hpc;
+use HelioviewerEventInterface\Types\EventLink;
 
 class IgnoreCme extends Exception {}
 
@@ -55,7 +56,6 @@ function TranslateCME(array $record, Hgs2Hpc $hgs2hpc, ?callable $postProcessor)
     $event->hpc_x   = $hpc['x'];
     $event->hpc_y   = $hpc['y'];
     $event->link    = $cme->link();
-    $event->linkText = $cme->linkText();
 
     if (isset($postProcessor)) {
         $event = $postProcessor($event);
@@ -145,17 +145,9 @@ class DonkiCme {
     /**
      * Returns the URL to the CME source data
      */
-    public function link() {
+    public function link(): ?EventLink {
         if ($this->hasLink()) {
-            return $this->data['link'];
-        } else {
-            return null;
-        }
-    }
-
-    public function linkText() {
-        if ($this->hasLink()) {
-            return "Go to full analysis";
+            return new EventLink("Go to full analysis", $this->data['link']);
         } else {
             return null;
         }
