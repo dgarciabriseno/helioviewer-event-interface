@@ -14,6 +14,7 @@ class HelioviewerEvent
     public float $hpc_x;       // Required
     public float $hpc_y;       // Required
     public string $link;       // Optional
+    public string $linkText;   // Optional (Required if $link is present)
 
     public float $hv_hpc_x;    // Reserved
     public float $hv_hpc_y;    // Reserved
