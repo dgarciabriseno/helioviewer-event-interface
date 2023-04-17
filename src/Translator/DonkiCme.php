@@ -54,6 +54,7 @@ function TranslateCME(array $record, Hgs2Hpc $hgs2hpc, ?callable $postProcessor)
     $event->end     = $end->format('Y-m-d H:i:s');
     $event->hpc_x   = $hpc['x'];
     $event->hpc_y   = $hpc['y'];
+    $event->link    = $cme->link();
 
     if (isset($postProcessor)) {
         $event = $postProcessor($event);
@@ -134,5 +135,16 @@ class DonkiCme {
             }
         }
         return null;
+    }
+
+    /**
+     * Returns the URL to the CME source data
+     */
+    public function link() {
+        if (array_key_exists("link", $this->data) && isset($this->data['link'])) {
+            return $this->data['link'];
+        } else {
+            return null;
+        }
     }
 }
