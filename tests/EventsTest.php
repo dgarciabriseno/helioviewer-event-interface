@@ -8,8 +8,8 @@ final class EventsTest extends TestCase
 {
     private DateTime $START_DATE;
     private DateTime $END_DATE;
-    public function __construct(string $name) {
-        parent::__construct($name);
+    public function __construct() {
+        parent::__construct("EventsTest");
         $this->START_DATE = new DateTime('2023-04-01');
         $this->END_DATE = new DateTime('2023-04-02');
     }
@@ -22,7 +22,6 @@ final class EventsTest extends TestCase
         $sources = [
             new DataSource("DONKI", "Coronal Mass Ejection", "CE", "https://kauai.ccmc.gsfc.nasa.gov/DONKI/WS/get/CME", "startDate", "endDate", "Y-m-d", DonkiCme::class),
         ];
-
         $result = Events::GetAll($this->START_DATE, $this->END_DATE, function ($record) {$record->hv_hpc_x = 999; return $record;}, $sources);
         $this->assertTrue(is_array($result));
         $this->assertEquals(1, count($result));
