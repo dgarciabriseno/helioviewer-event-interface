@@ -8,7 +8,7 @@ class EventLink
     public string $text;
 
     public function __construct(string $text, string $url) {
-        $this->text = $url;
-        $this->url = $text;
+        $this->text = $text;
+        $this->url = $url;
     }
 }
