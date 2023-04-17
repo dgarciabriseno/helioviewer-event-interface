@@ -108,11 +108,11 @@ class DonkiCme {
      * Creates the multiline text label used to describe this record.
      */
     public function label() {
-        $defaultLabel = $this->data['catalog'] . "\n" . $this->data['startTime'] . "\n";
+        $defaultLabel = $this->data['startTime'];
         // Get the CME Analyses
         $analysis = $this->mostAccurateAnalysis();
         if (isset($analysis)) {
-            return $defaultLabel . "Type: " . $analysis['type'] . "\nHalf Angle: " . $analysis['halfAngle'] . "\nSpeed: " . $analysis['speed'] . "km/s";
+            return "Type: " . $analysis['type'] . "\nHalf Angle: " . $analysis['halfAngle'] . "\nSpeed: " . $analysis['speed'] . "km/s";
         }
         // If fields weren't present to create a more accurate label, then just use basic information.
         return $defaultLabel;
