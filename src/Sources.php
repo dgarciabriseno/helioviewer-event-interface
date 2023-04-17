@@ -10,7 +10,8 @@ use HelioviewerEventInterface\DataSource;
 class Sources {
     public static function All() {
         return [
-            new DataSource("DONKI", "Coronal Mass Ejection", "CE", "https://kauai.ccmc.gsfc.nasa.gov/DONKI/WS/get/CME", "startDate", "endDate", "Y-m-d", "DonkiCme"),
+            // Using "C3" instead of "CE" because this abbreviation needs to be unique across all data sources and CE is taken by HEK
+            new DataSource("DONKI", "Coronal Mass Ejection", "C3", "https://kauai.ccmc.gsfc.nasa.gov/DONKI/WS/get/CME", "startDate", "endDate", "Y-m-d", "DonkiCme"),
         ];
     }
 
