@@ -4,11 +4,11 @@ namespace HelioviewerEventInterface\Types;
 
 class EventLink
 {
-    public string $link;
-    public string $linkText;
+    public string $url;
+    public string $text;
 
     public function __construct(string $text, string $url) {
-        $this->link = $url;
-        $this->linkText = $text;
+        $this->text = $url;
+        $this->url = $text;
     }
 }
