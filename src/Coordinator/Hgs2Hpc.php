@@ -3,6 +3,7 @@
 namespace HelioviewerEventInterface\Coordinator;
 
 use \Socket;
+use \Exception;
 
 class Hgs2Hpc {
     private Socket $socket;
@@ -31,6 +32,9 @@ class Hgs2Hpc {
         $this->socket = socket_create(AF_UNIX, SOCK_STREAM, 0);
         if (socket_connect($this->socket, "/tmp/hgs2hpc.sock")) {
             $this->connected = true;
+            // Don't let socket hang while reading. Processing a coordinate should definitely not take more than 1 second.
+            // Keep in mind this timeout was arbitrarily chosen as an upper limit, not by profiling actual compute time.
+            socket_set_option($this->socket, SOL_SOCKET, SO_RCVTIMEO, ["sec" => 1, "usec" => 0]);
         } else {
             error_log("Failed to connect to the python Hgs2Hpc server. Check that it's running and that permissions allow the user running PHP to read and write to it.");
         }
@@ -65,7 +69,7 @@ class Hgs2Hpc {
     private function write(string $msg) {
         $success = socket_write($this->socket, $msg);
         if ($success === false) {
-            $this->throwSocketError();
+            $this->throwSocketError("Error writing to hgs2hpc: ");
         }
     }
 
@@ -75,7 +79,7 @@ class Hgs2Hpc {
     private function read() {
         $result = socket_read($this->socket, 1024);
         if ($result === false || $result === "") {
-            $this->throwSocketError();
+            $this->throwSocketError("Error reading from hgs2hpc: ");
         }
         return $result;
     }
@@ -83,8 +87,8 @@ class Hgs2Hpc {
     /**
      * Throws an exception with the error message provided by the socket interface.
      */
-    private function throwSocketError() {
-        throw new Exception(socket_strerror(socket_last_error($this->socket)));
+    private function throwSocketError(string $msg) {
+        throw new Exception($msg . socket_strerror(socket_last_error($this->socket)));
     }
 
     /**
