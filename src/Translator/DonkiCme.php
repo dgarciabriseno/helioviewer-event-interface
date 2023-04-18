@@ -114,7 +114,7 @@ class DonkiCme {
         // Get the CME Analyses
         $analysis = $this->mostAccurateAnalysis();
         if (isset($analysis)) {
-            return "Type: " . $analysis['type'] . "\nHalf Angle: " . $analysis['halfAngle'] . "\n" . $analysis['speed'] . " km/s";
+            return "Type: " . $analysis['type'] . "\nHalf Angle: " . $analysis['halfAngle'] . "&deg;\n" . $analysis['speed'] . " km/s";
         }
         // If fields weren't present to create a more accurate label, then just use basic information.
         return $defaultLabel;
