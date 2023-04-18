@@ -111,13 +111,14 @@ class DonkiCme {
      */
     public function label() {
         $defaultLabel = $this->data['startTime'];
+        $modeled = $this->hasModelRun() ? "\nModeled" : "";
         // Get the CME Analyses
         $analysis = $this->mostAccurateAnalysis();
         if (isset($analysis)) {
-            return "Type: " . $analysis['type'] . "\nHalf Angle: " . $analysis['halfAngle'] . "&deg;\n" . $analysis['speed'] . " km/s";
+            return "Type: " . $analysis['type'] . "\nHalf Angle: " . $analysis['halfAngle'] . "&deg;\n" . $analysis['speed'] . " km/s" . $modeled;
         }
         // If fields weren't present to create a more accurate label, then just use basic information.
-        return $defaultLabel;
+        return $defaultLabel . $modeled;
     }
 
     /**
@@ -140,6 +141,15 @@ class DonkiCme {
 
     private function hasLink(): bool {
         return array_key_exists("link", $this->data) && isset($this->data['link']);
+    }
+
+    private function hasModelRun(): bool {
+        $analysis = $this->mostAccurateAnalysis();
+        $modelKey = 'enlilList';
+        if ($analysis && array_key_exists($modelKey, $analysis) && isset($analysis[$modelKey])) {
+            return count($analysis[$modelKey]) > 0;
+        }
+        return false;
     }
 
     /**
