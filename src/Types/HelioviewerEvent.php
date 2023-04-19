@@ -13,6 +13,7 @@ class HelioviewerEvent
     public string $start;      // Required
     public string $end;        // Required
     public array $source;      // Required
+    public array $views;       // Required
     public float $hpc_x;       // Required
     public float $hpc_y;       // Required
     public ?EventLink $link;   // Optional

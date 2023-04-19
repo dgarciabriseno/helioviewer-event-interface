@@ -56,6 +56,8 @@ function TranslateCME(array $record, Hgs2Hpc $hgs2hpc, ?callable $postProcessor)
     $event->hpc_x   = $hpc['x'];
     $event->hpc_y   = $hpc['y'];
     $event->link    = $cme->link();
+    $event->views   = ['name' => 'CME', 'content' => $cme->view()];
+
 
     if (isset($postProcessor)) {
         $event = $postProcessor($event);
@@ -161,5 +163,116 @@ class DonkiCme {
         } else {
             return null;
         }
+    }
+
+    /**
+     * Returns data from the data object or null if the key doesn't exist
+     */
+    private function get(string $key): mixed {
+        if (array_key_exists($key, $this->data)) {
+            return $this->data[$key];
+        }
+        return null;
+    }
+
+    /**
+     * Appends impact information to the given array
+     */
+    private function appendModelDetails(array &$data): void {
+        $analysis = $this->mostAccurateAnalysis();
+        if ($analysis) {
+            $latestModel = $this->getLatestModel($analysis);
+            if ($latestModel) {
+                $base['Model Run Link'] = $latestModel['link'] ?? null;
+                $impactList = $latestModel['impactList'] ?? [];
+                foreach ($impactList as $impact) {
+                    $base[$impact['location'] . " Impact"] = ($impact['isGlancingBlow'] ?? false) ? $impact['arrivalTime'] : "No Impact";
+                }
+            }
+        }
+    }
+
+    /**
+     * Returns a stringified version of the impact list
+     */
+    private function getImpactList(array $impactList): string {
+        $result = "";
+        foreach ($impactList as $impact) {
+            if ($impact['isGlancingBlow'] ?? false) {
+                $result .= $impact['location'] . " at " . $impact['arrivalTime'];
+            }
+        }
+    }
+
+    /**
+     * Returns the model run with the newest timestamp
+     */
+    private function getLatestModel(array $analysis): ?array {
+        $models = $analysis['enlilList'] ?? [];
+        if (count($models) > 0) {
+            $latest = array_reduce($models, function ($a, $b) {
+                $lastTime = new DateTimeImmutable($a['modelCompletionTime']);
+                $currentTime = new DateTimeImmutable($b['modelCompletionTime']);
+                return $currentTime > $lastTime ? $b : $a;
+            }, $models[0]);
+            return $latest;
+        }
+        return null;
+    }
+
+    /**
+     * Returns the most relevant CME data in a flat array of key-value pairs
+     */
+    public function view(): array {
+        $base = [
+            "Activity ID" => $this->get('activityID'),
+            "Catalog"     => $this->get('catalog'),
+            "Start Time"  => $this->get('startTime'),
+            "Latitude"    => $this->latitude,
+            "Longitude"   => $this->longitude,
+            "Active Region" => $this->get('activeRegionNum'),
+            "External Link" => $this->get('link'),
+            "Instruments" => $this->instruments(),
+            "Related Events" => $this->linkedEvents()
+        ];
+
+        $analysis = $this->mostAccurateAnalysis();
+        if ($analysis) {
+            $base['Half Angle'] = $analysis['halfAngle'] ?? null;
+            $base['Speed'] = $analysis['speed'] ?? null;
+            $base['Type'] = $analysis['type'] ?? null;
+            $base['Analysis Note'] = $analysis['note'] ?? null;
+            $base['Analysis Link'] = $analysis['link'] ?? null;
+            $this->appendModelDetails($base);
+        }
+
+        return $base;
+    }
+
+    private function linkedEvents(): ?string {
+        $events = $this->get('linkedEvents');
+        if (isset($events) && count($events) > 0) {
+            $string = "";
+            foreach ($events as $link) {
+                $string .= $link['activityID'] . ", ";
+            }
+            $string = substr($string, 0, strlen($string) - 2);
+            return $string;
+        }
+        return null;
+    }
+
+    /**
+     * Returns the instruments used to discover this CME
+     */
+    private function instruments(): string {
+        $instruments = $this->get('instruments');
+        $text = "";
+        if ($instruments) {
+            foreach ($instruments as $inst) {
+                $text .= $inst['displayName'] . " ";
+            }
+        }
+        return $text;
     }
 }

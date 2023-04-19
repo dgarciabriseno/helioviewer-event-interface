@@ -3,6 +3,7 @@
 namespace HelioviewerEventInterface;
 
 use \DateTimeInterface;
+use \Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Promise\PromiseInterface;
@@ -77,7 +78,7 @@ class DataSource {
                 }
             },
             // Fail gracefully on failure by logging the result and returning an empty list representing no data available from this source.
-            function (RequestException $e) {
+            function (Exception $e) {
                 error_log($e->getMessage());
                 return [];
             }
