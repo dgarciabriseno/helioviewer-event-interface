@@ -270,7 +270,11 @@ class DonkiCme {
         $text = "";
         if ($instruments) {
             foreach ($instruments as $inst) {
-                $text .= $inst['displayName'] . " ";
+                $text .= $inst['displayName'] . ", ";
+            }
+            if (strlen($text) > 2) {
+                // Trim trailing comma
+                $text = substr($text, 0, strlen($text) - 2);
             }
         }
         return $text;
