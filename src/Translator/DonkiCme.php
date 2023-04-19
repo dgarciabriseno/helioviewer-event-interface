@@ -56,7 +56,7 @@ function TranslateCME(array $record, Hgs2Hpc $hgs2hpc, ?callable $postProcessor)
     $event->hpc_x   = $hpc['x'];
     $event->hpc_y   = $hpc['y'];
     $event->link    = $cme->link();
-    $event->views   = ['name' => 'CME', 'content' => $cme->view()];
+    $event->views   = [['name' => 'CME', 'content' => $cme->view()]];
 
 
     if (isset($postProcessor)) {
