@@ -233,7 +233,8 @@ class DonkiCme {
             "Active Region" => $this->get('activeRegionNum'),
             "External Link" => $this->get('link'),
             "Instruments" => $this->instruments(),
-            "Related Events" => $this->linkedEvents()
+            "Related Events" => $this->linkedEvents(),
+            "Note" => $this->get('note')
         ];
 
         $analysis = $this->mostAccurateAnalysis();
