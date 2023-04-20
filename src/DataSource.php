@@ -91,22 +91,20 @@ class DataSource {
      */
     public function getResult(): array {
         if (isset($this->request)) {
-            $group = $this->request->wait();
-            return $this->BuildEventCategory($group);
+            $groups = $this->request->wait();
+            return $this->BuildEventCategory($groups);
         }
         error_log("Attempted to get the result without calling beginQuery");
         return $this->BuildEventCategory(null);
     }
 
-    private function BuildEventCategory(?array $group): array {
+    private function BuildEventCategory(?array $groups): array {
         $frame = [
             'name' => $this->name,
             'pin' => $this->pin,
-            'groups' => []
+            'groups' => $groups ?? []
         ];
-        if (isset($group) && (count($group) > 0)) {
-            array_push($frame['groups'], $group);
-        }
+
         return $frame;
     }
 }
