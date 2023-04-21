@@ -7,11 +7,11 @@ use PHPUnit\Framework\TestCase;
 final class EventsTest extends TestCase
 {
     private DateTime $START_DATE;
-    private DateTime $END_DATE;
+    private DateInterval $LENGTH;
     public function __construct() {
         parent::__construct("EventsTest");
         $this->START_DATE = new DateTime('2023-04-01');
-        $this->END_DATE = new DateTime('2023-04-02');
+        $this->LENGTH = new DateInterval('P1D');
     }
 
     /**
@@ -20,9 +20,9 @@ final class EventsTest extends TestCase
     public function testGetEvents(): void
     {
         $sources = [
-            new DataSource("DONKI", "Coronal Mass Ejection", "CE", "https://kauai.ccmc.gsfc.nasa.gov/DONKI/WS/get/CME", "startDate", "endDate", "Y-m-d", DonkiCme::class),
+            new DataSource("DONKI", "Coronal Mass Ejection", "CE", "https://kauai.ccmc.gsfc.nasa.gov/DONKI/WS/get/CME", "startDate", "endDate", "Y-m-d", false, DonkiCme::class),
         ];
-        $result = Events::GetAll($this->START_DATE, $this->END_DATE, function ($record) {$record->hv_hpc_x = 999; return $record;}, $sources);
+        $result = Events::GetAll($this->START_DATE, $this->LENGTH, function ($record) {$record->hv_hpc_x = 999; return $record;}, $sources);
         $this->assertTrue(is_array($result));
         $this->assertEquals(1, count($result));
         $this->assertTrue(array_key_exists('groups', $result[0]));
@@ -34,7 +34,7 @@ final class EventsTest extends TestCase
      * Verifies that even if a source is given that doesn't exist, nothing will crash
      */
     public function testGetNothingFromSource(): void {
-        $emptySet = Events::GetFromSource(["beep beep"], $this->START_DATE, $this->END_DATE);
+        $emptySet = Events::GetFromSource(["beep beep"], $this->START_DATE, $this->LENGTH);
         $this->assertIsArray($emptySet);
         $this->assertEmpty($emptySet);
     }
@@ -43,7 +43,7 @@ final class EventsTest extends TestCase
      * Verifies that even if a source is given that doesn't exist, nothing will crash
      */
     public function testGetFromSource(): void {
-        $data = Events::GetFromSource(["DONKI"], $this->START_DATE, $this->END_DATE);
+        $data = Events::GetFromSource(["DONKI"], $this->START_DATE, $this->LENGTH);
         $this->assertTrue(is_array($data));
         $this->assertEquals(1, count($data));
         $this->assertTrue(array_key_exists('groups', $data[0]));
@@ -51,9 +51,10 @@ final class EventsTest extends TestCase
     }
 
     public function testGetAll(): void {
-        $end = new DateTimeImmutable();
-        $start = $end->sub(new DateInterval("P2D"));
-        Events::GetAll($start, $end);
+        $length = new DateInterval("P2D");
+        $start = new DateTime();
+        $start->sub($length);
+        Events::GetAll($start, $length);
     }
 }
 

@@ -6,13 +6,13 @@ use HelioviewerEventInterface\Events;
 $sources = $_GET['sources'] ?? null;
 $start = $_GET['start'] ?? '2023-04-01';
 $startDate = new DateTimeImmutable($start);
-$end = $_GET['end'] ?? '2023-04-02';
-$endDate = new DateTimeImmutable($end);
+$length = $_GET['length'] ?? 'P1D';
+$length = new DateInterval($length);
 
 if (isset($sources)) {
-    $data = Events::GetFromSource($sources, $startDate, $endDate, null);
+    $data = Events::GetFromSource($sources, $startDate, $length, null);
 } else {
-    $data = Events::GetAll($startDate, $endDate);
+    $data = Events::GetAll($startDate, $length);
 }
 header("Content-Type: application/json");
 echo json_encode($data);

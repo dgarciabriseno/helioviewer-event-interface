@@ -2,6 +2,8 @@
 
 namespace HelioviewerEventInterface;
 
+use DateInterval;
+use DateTimeImmutable;
 use \DateTimeInterface;
 use \Exception;
 use GuzzleHttp\Client;
@@ -20,6 +22,7 @@ class DataSource {
     protected string $startName;
     protected string $endName;
     protected string $dateFormat;
+    protected bool   $reverse;
     protected string $translator;
     protected ?array $queryParameters;
     protected mixed  $extra;
@@ -33,11 +36,12 @@ class DataSource {
      * @param string $startName The query string parameter name for the start date.
      * @param string $endName The query string parameter name for the end date.
      * @param string $dateFormat The format to use for the dates.
+     * @param bool   $reverse Whether this data source should query backwards in time instead of forwards in time.
      * @param string $translator The name of the translator class to use for this data source.
      * @param ?array $queryParameters Constant parameters that will pass through to the http request
      * @param mixed  $extra Extra data to pass through to the translator
      */
-    public function __construct(string $source, string $name, string $pin, string $uri, string $startName, string $endName, string $dateFormat, string $translator, ?array $queryParameters = null, mixed $extra = null) {
+    public function __construct(string $source, string $name, string $pin, string $uri, string $startName, string $endName, string $dateFormat, bool $reverse, string $translator, ?array $queryParameters = null, mixed $extra = null) {
         $this->source = $source;
         $this->name = $name;
         $this->pin = $pin;
@@ -45,6 +49,7 @@ class DataSource {
         $this->startName = $startName;
         $this->endName = $endName;
         $this->dateFormat = $dateFormat;
+        $this->reverse = $reverse;
         $this->translator = $translator;
         $this->queryParameters = $queryParameters;
         $this->extra = $extra;
@@ -54,14 +59,18 @@ class DataSource {
      * Queries the data source asynchronously for relevant data between the start and end times.
      * Use getResult() to get the response from the last query.
      * @param DateTimeInterface $start Start of time range
-     * @param DateTimeInterface $end End of time range
+     * @param DateInterval $length Length of time to query
      * @param callable $postprocessor Executable function to call on each Helioviewer Event processed during the query
      * @return PromiseInterface
      */
-    public function beginQuery(DateTimeInterface $start, DateTimeInterface $end, ?callable $postprocessor = null) {
+    public function beginQuery(DateTimeInterface $start, DateInterval $length, ?callable $postprocessor = null) {
         // Convert input dates to strings
         $startString = $start->format($this->dateFormat);
-        $endString = $end->format($this->dateFormat);
+        $startDate = DateTimeImmutable::createFromInterface($start);
+        if ($this->reverse) {
+            $length->invert = 1;
+        }
+        $endString = $startDate->add($length)->format($this->dateFormat);
         // Perform HTTP request to the source url
         $client = new Client(["base_uri" => $this->uri]);
         // Define the request with the date range as query parameters
