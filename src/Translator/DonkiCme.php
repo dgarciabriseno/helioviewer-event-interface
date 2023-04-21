@@ -46,7 +46,7 @@ function Translate(array $data, ?callable $postProcessor): array {
     return array_values($groups);
 }
 
-function TranslateCME(array $record, Hgs2Hpc $hgs2hpc, ?callable $postProcessor): HelioviewerEvent {
+function TranslateCME(array $record, Hgs2Hpc $hgs2hpc, ?callable $postProcessor): array {
     $start = new DateTimeImmutable($record['startTime']);
     $end = $start->add(new DateInterval("P1D"));
     $cme = new DonkiCme($record);
@@ -70,7 +70,7 @@ function TranslateCME(array $record, Hgs2Hpc $hgs2hpc, ?callable $postProcessor)
     }
 
     $event->source = $record;
-    return $event;
+    return (array) $event;
 }
 
 /**

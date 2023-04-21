@@ -27,7 +27,7 @@ final class EventsTest extends TestCase
         $this->assertEquals(1, count($result));
         $this->assertTrue(array_key_exists('groups', $result[0]));
         // Verify closure works
-        $this->assertEquals(999, $result[0]['groups'][0]['data'][0]->hv_hpc_x);
+        $this->assertEquals(999, $result[0]['groups'][0]['data'][0]['hv_hpc_x']);
     }
 
     /**
