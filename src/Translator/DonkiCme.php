@@ -62,9 +62,7 @@ function TranslateCME(array $record, Hgs2Hpc $hgs2hpc, ?callable $postProcessor)
     $event->hpc_x   = $hpc['x'];
     $event->hpc_y   = $hpc['y'];
     $event->link    = $cme->link();
-    $event->views   = [['name' => 'CME', 'content' => $cme->cme_view()],
-                       ['name' => 'Analysis', 'content' => $cme->analysis_view()],
-                       ['name' => 'Model Run', 'content' => $cme->model_view()]];
+    $event->views   = $cme->views();
 
 
     if (isset($postProcessor)) {
@@ -114,6 +112,28 @@ class DonkiCme {
             // East Positive, West Negative
             $this->longitude = $east_west == "E" ? $east_west_value : -$east_west_value;
         }
+    }
+
+    public function views(): array  {
+        // Begin with the main view
+        $base = [['name' => 'CME', 'content' => $this->cme_view()]];
+        // Build a tab for each analysis
+        $analyses = $this->get('cmeAnalyses') ?? [];
+        foreach ($analyses as $index => $analysis) {
+            array_push($base, [
+                'name' => "Analysis " . $index + 1,
+                'content' => $this->analysis_view($analysis)
+            ]);
+            // Build a tab for each model run in the analysis
+            $models = $analysis['enlilList'] ?? [];
+            foreach ($models as $index => $model) {
+                array_push($base, [
+                    'name' => "Model " . $index + 1,
+                    'content' => $this->model_view($model)
+                ]);
+            }
+        }
+        return $base;
     }
 
     /**
@@ -186,63 +206,30 @@ class DonkiCme {
     /**
      * Appends impact information to the given array
      */
-    public function model_view(): ?array {
-        $analysis = $this->mostAccurateAnalysis();
-        $content = null;
-        if ($analysis) {
-            $latestModel = $this->getLatestModel($analysis);
-            if ($latestModel) {
-                $content = Camel2Title::Parse($latestModel, [
-                    "modelCompletionTime",
-                    "link",
-                    "estimatedShockArrivalTime",
-                    "estimatedDuration",
-                ]);
-                $content = Subarray::merge($content, $latestModel, [
-                    "au",
-                    "rmin_re",
-                    "kp_18",
-                    "kp_90",
-                    "kp_135",
-                    "kp_180"
-                ]);
-                $content['Is Earth GB'] = $latestModel['isEarthGB'] ?? null;
-                $impactList = $latestModel['impactList'] ?? [];
-                foreach ($impactList as $impact) {
-                    $content[$impact['location'] . " Impact"] = $impact['arrivalTime'];
-                    $content[$impact['location'] . " Glancing Blow"] = $impact['isGlancingBlow'];
-                }
+    public function model_view(?array $model): ?array {
+        if ($model) {
+            $content = Camel2Title::Parse($model, [
+                "modelCompletionTime",
+                "link",
+                "estimatedShockArrivalTime",
+                "estimatedDuration",
+            ]);
+            $content = Subarray::merge($content, $model, [
+                "au",
+                "rmin_re",
+                "kp_18",
+                "kp_90",
+                "kp_135",
+                "kp_180"
+            ]);
+            $content['Is Earth GB'] = $model['isEarthGB'] ?? null;
+            $impactList = $model['impactList'] ?? [];
+            foreach ($impactList as $impact) {
+                $content[$impact['location'] . " Impact"] = $impact['arrivalTime'];
+                $content[$impact['location'] . " Glancing Blow"] = $impact['isGlancingBlow'];
             }
         }
         return $content;
-    }
-
-    /**
-     * Returns a stringified version of the impact list
-     */
-    private function getImpactList(array $impactList): string {
-        $result = "";
-        foreach ($impactList as $impact) {
-            if ($impact['isGlancingBlow'] ?? false) {
-                $result .= $impact['location'] . " at " . $impact['arrivalTime'];
-            }
-        }
-    }
-
-    /**
-     * Returns the model run with the newest timestamp
-     */
-    private function getLatestModel(array $analysis): ?array {
-        $models = $analysis['enlilList'] ?? [];
-        if (count($models) > 0) {
-            $latest = array_reduce($models, function ($a, $b) {
-                $lastTime = new DateTimeImmutable($a['modelCompletionTime']);
-                $currentTime = new DateTimeImmutable($b['modelCompletionTime']);
-                return $currentTime > $lastTime ? $b : $a;
-            }, $models[0]);
-            return $latest;
-        }
-        return null;
     }
 
     /**
@@ -263,16 +250,18 @@ class DonkiCme {
         ];
     }
 
-    public function analysis_view(): ?array {
+    public function analysis_view(?array $analysis): ?array {
         $base = null;
-        $analysis = $this->mostAccurateAnalysis();
         if ($analysis) {
-            $base = [];
-            $base['Half Angle'] = $analysis['halfAngle'] ?? null;
-            $base['Speed'] = $analysis['speed'] ?? null;
-            $base['Type'] = $analysis['type'] ?? null;
-            $base['Analysis Note'] = $analysis['note'] ?? null;
-            $base['Analysis Link'] = $analysis['link'] ?? null;
+            $base = Camel2Title::Parse($analysis, [
+                "isMostAccurate",
+                "levelOfData",
+                "type",
+                "speed",
+                "halfAngle",
+                "note",
+                "link",
+            ]);
         }
 
         return $base;

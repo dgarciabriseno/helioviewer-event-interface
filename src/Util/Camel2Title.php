@@ -15,12 +15,11 @@ class Camel2Title {
      */
     static public function Parse(array $data, ?array $fields = null): array {
         $processed = [];
-        foreach ($data as $key => $value) {
-            // Only process the key if fields is null, or if the given key is in the field list.
-            if (is_null($fields) || (isset($fields) && in_array($key, $fields))) {
-                $titleCase = self::camel2Title($key);
-                $processed[$titleCase] = $value;
-            }
+        $fields = $fields ?? array_keys($data);
+        foreach ($fields as $key) {
+            $value = $data[$key];
+            $titleCase = self::camel2Title($key);
+            $processed[$titleCase] = $value;
         }
         return $processed;
     }
