@@ -186,9 +186,9 @@ class DonkiCme {
     /**
      * Appends impact information to the given array
      */
-    public function model_view(): array {
+    public function model_view(): ?array {
         $analysis = $this->mostAccurateAnalysis();
-        $content = [];
+        $content = null;
         if ($analysis) {
             $latestModel = $this->getLatestModel($analysis);
             if ($latestModel) {
@@ -263,10 +263,11 @@ class DonkiCme {
         ];
     }
 
-    public function analysis_view(): array {
-        $base = [];
+    public function analysis_view(): ?array {
+        $base = null;
         $analysis = $this->mostAccurateAnalysis();
         if ($analysis) {
+            $base = [];
             $base['Half Angle'] = $analysis['halfAngle'] ?? null;
             $base['Speed'] = $analysis['speed'] ?? null;
             $base['Type'] = $analysis['type'] ?? null;
