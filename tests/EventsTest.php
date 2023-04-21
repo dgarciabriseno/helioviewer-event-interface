@@ -49,5 +49,11 @@ final class EventsTest extends TestCase
         $this->assertTrue(array_key_exists('groups', $data[0]));
         $this->assertEquals(8, count($data[0]['groups'][0]['data']));
     }
+
+    public function testGetAll(): void {
+        $end = new DateTimeImmutable();
+        $start = $end->sub(new DateInterval("P2D"));
+        Events::GetAll($start, $end);
+    }
 }
 

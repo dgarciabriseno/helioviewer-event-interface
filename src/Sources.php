@@ -12,6 +12,7 @@ class Sources {
         return [
             // Using "C3" instead of "CE" because this abbreviation needs to be unique across all data sources and CE is taken by HEK
             new DataSource("DONKI", "Coronal Mass Ejection", "C3", "https://kauai.ccmc.gsfc.nasa.gov/DONKI/WS/get/CME", "startDate", "endDate", "Y-m-d", "DonkiCme"),
+            new DataSource("CCMC", "Solar Flare Prediction", "FP", "https://iswa.gsfc.nasa.gov/IswaSystemWebApp/flarescoreboard/hapi/data", "time.min", "time.max", "Y-m-d\TH:i:s", "FlarePrediction", ["id" => "SIDC_Operator_REGIONS", "format" => "json", "include" => "header"], "SIDC Operator"),
         ];
     }
 

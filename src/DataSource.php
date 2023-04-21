@@ -5,7 +5,6 @@ namespace HelioviewerEventInterface;
 use \DateTimeInterface;
 use \Exception;
 use GuzzleHttp\Client;
-use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Promise\PromiseInterface;
 use Psr\Http\Message\ResponseInterface;
 
@@ -22,6 +21,8 @@ class DataSource {
     protected string $endName;
     protected string $dateFormat;
     protected string $translator;
+    protected ?array $queryParameters;
+    protected mixed  $extra;
     private PromiseInterface $request;
 
     /**
@@ -33,8 +34,10 @@ class DataSource {
      * @param string $endName The query string parameter name for the end date.
      * @param string $dateFormat The format to use for the dates.
      * @param string $translator The name of the translator class to use for this data source.
+     * @param ?array $queryParameters Constant parameters that will pass through to the http request
+     * @param mixed  $extra Extra data to pass through to the translator
      */
-    public function __construct(string $source, string $name, string $pin, string $uri, string $startName, string $endName, string $dateFormat, string $translator) {
+    public function __construct(string $source, string $name, string $pin, string $uri, string $startName, string $endName, string $dateFormat, string $translator, ?array $queryParameters = null, mixed $extra = null) {
         $this->source = $source;
         $this->name = $name;
         $this->pin = $pin;
@@ -43,6 +46,8 @@ class DataSource {
         $this->endName = $endName;
         $this->dateFormat = $dateFormat;
         $this->translator = $translator;
+        $this->queryParameters = $queryParameters;
+        $this->extra = $extra;
     }
 
     /**
@@ -60,18 +65,20 @@ class DataSource {
         // Perform HTTP request to the source url
         $client = new Client(["base_uri" => $this->uri]);
         // Define the request with the date range as query parameters
+        $params = array_merge([$this->startName => $startString, $this->endName => $endString], $this->queryParameters ?? []);
         $promise = $client->requestAsync('GET', '', [
-            'query' => [$this->startName => $startString, $this->endName => $endString]
+            'query' => $params
         ]);
+        $extra = $this->extra;
         $this->request = $promise->then(
             // Decode the json result on a successful request
-            function (ResponseInterface $response) use ($postprocessor) {
+            function (ResponseInterface $response) use ($postprocessor, $extra) {
                 $data = json_decode($response->getBody()->getContents(), true);
                 if (isset($data)) {
                     // Load the requested translator and execute it
                     include_once __DIR__ . "/Translator/" . $this->translator . ".php";
                     // Ah yes, indulge in string execution.
-                    return "HelioviewerEventInterface\\$this->translator\\Translate"($data, $postprocessor);
+                    return "HelioviewerEventInterface\\$this->translator\\Translate"($data, $extra, $postprocessor);
                 } else {
                     // If data is null, then there's no data for the query, return an empty list.
                     return [];

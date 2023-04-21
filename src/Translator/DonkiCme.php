@@ -14,7 +14,7 @@ use HelioviewerEventInterface\Util\Subarray;
 
 class IgnoreCme extends Exception {}
 
-function Translate(array $data, ?callable $postProcessor): array {
+function Translate(array $data, mixed $extra, ?callable $postProcessor): array {
     $groups = [];
     // Breaking encapsulation a bit... but creating one overall Hgs2Hpc instance means it will reuse the socket connection for each record.
     // This should give a slight performance improvement since it doesn't need to create a new connection for each record.
