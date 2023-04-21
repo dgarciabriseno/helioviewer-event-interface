@@ -9,6 +9,8 @@ use \Throwable;
 use HelioviewerEventInterface\Types\HelioviewerEvent;
 use HelioviewerEventInterface\Coordinator\Hgs2Hpc;
 use HelioviewerEventInterface\Types\EventLink;
+use HelioviewerEventInterface\Util\Camel2Title;
+use HelioviewerEventInterface\Util\Subarray;
 
 class IgnoreCme extends Exception {}
 
@@ -60,7 +62,9 @@ function TranslateCME(array $record, Hgs2Hpc $hgs2hpc, ?callable $postProcessor)
     $event->hpc_x   = $hpc['x'];
     $event->hpc_y   = $hpc['y'];
     $event->link    = $cme->link();
-    $event->views   = [['name' => 'CME', 'content' => $cme->view()]];
+    $event->views   = [['name' => 'CME', 'content' => $cme->cme_view()],
+                       ['name' => 'Analysis', 'content' => $cme->analysis_view()],
+                       ['name' => 'Model Run', 'content' => $cme->model_view()]];
 
 
     if (isset($postProcessor)) {
@@ -182,18 +186,35 @@ class DonkiCme {
     /**
      * Appends impact information to the given array
      */
-    private function appendModelDetails(array &$data): void {
+    public function model_view(): array {
         $analysis = $this->mostAccurateAnalysis();
+        $content = [];
         if ($analysis) {
             $latestModel = $this->getLatestModel($analysis);
             if ($latestModel) {
-                $base['Model Run Link'] = $latestModel['link'] ?? null;
+                $content = Camel2Title::Parse($latestModel, [
+                    "modelCompletionTime",
+                    "link",
+                    "estimatedShockArrivalTime",
+                    "estimatedDuration",
+                ]);
+                $content = Subarray::merge($content, $latestModel, [
+                    "au",
+                    "rmin_re",
+                    "kp_18",
+                    "kp_90",
+                    "kp_135",
+                    "kp_180"
+                ]);
+                $content['Is Earth GB'] = $latestModel['isEarthGB'] ?? null;
                 $impactList = $latestModel['impactList'] ?? [];
                 foreach ($impactList as $impact) {
-                    $base[$impact['location'] . " Impact"] = ($impact['isGlancingBlow'] ?? false) ? $impact['arrivalTime'] : "No Impact";
+                    $content[$impact['location'] . " Impact"] = $impact['arrivalTime'];
+                    $content[$impact['location'] . " Glancing Blow"] = $impact['isGlancingBlow'];
                 }
             }
         }
+        return $content;
     }
 
     /**
@@ -227,20 +248,23 @@ class DonkiCme {
     /**
      * Returns the most relevant CME data in a flat array of key-value pairs
      */
-    public function view(): array {
-        $base = [
+    public function cme_view(): array {
+        return [
             "Activity ID" => $this->get('activityID'),
             "Catalog"     => $this->get('catalog'),
+            "Active Region" => $this->get('activeRegionNum'),
             "Start Time"  => $this->get('startTime'),
             "Latitude"    => $this->latitude,
             "Longitude"   => $this->longitude,
-            "Active Region" => $this->get('activeRegionNum'),
             "External Link" => $this->get('link'),
             "Instruments" => $this->instruments(),
             "Related Events" => $this->linkedEvents(),
             "Note" => $this->get('note')
         ];
+    }
 
+    public function analysis_view(): array {
+        $base = [];
         $analysis = $this->mostAccurateAnalysis();
         if ($analysis) {
             $base['Half Angle'] = $analysis['halfAngle'] ?? null;
@@ -248,7 +272,6 @@ class DonkiCme {
             $base['Type'] = $analysis['type'] ?? null;
             $base['Analysis Note'] = $analysis['note'] ?? null;
             $base['Analysis Link'] = $analysis['link'] ?? null;
-            $this->appendModelDetails($base);
         }
 
         return $base;
