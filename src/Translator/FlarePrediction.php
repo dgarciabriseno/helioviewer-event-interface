@@ -31,8 +31,8 @@ function Translate(array $data, string $method, ?callable $postProcessor): array
         $event->end = $prediction['end_window'];
         $event->source = $prediction->jsonSerialize();
         $event->views = [
-            'name' => 'Flare Prediction',
-            'content' => $event->source
+            ['name' => 'Flare Prediction',
+            'content' => $event->source]
         ];
         $hpc = $coord->convert(GetLatitude($prediction), GetLongitude($prediction), GetTime($prediction));
         $event->hpc_x = $hpc['x'];
