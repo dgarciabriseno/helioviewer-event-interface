@@ -9,6 +9,10 @@ $startDate = new DateTimeImmutable($start);
 $end = $_GET['end'] ?? '2023-04-02';
 $endDate = new DateTimeImmutable($end);
 
-$data = Events::GetAll($startDate, $endDate, null, $sources);
+if (isset($sources)) {
+    $data = Events::GetFromSource($sources, $startDate, $endDate, null);
+} else {
+    $data = Events::GetAll($startDate, $endDate);
+}
 header("Content-Type: application/json");
 echo json_encode($data);
