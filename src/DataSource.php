@@ -8,6 +8,7 @@ use \DateTimeInterface;
 use \Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Promise\PromiseInterface;
+use GuzzleHttp\Psr7\Request;
 use Psr\Http\Message\ResponseInterface;
 
 /**
@@ -27,6 +28,14 @@ class DataSource {
     protected ?array $queryParameters;
     protected mixed  $extra;
     private PromiseInterface $request;
+    private static ?Client $HttpClient = null;
+
+    private static function GetClient() {
+        if (is_null(self::$HttpClient)) {
+            self::$HttpClient = new Client([]);
+        }
+        return self::$HttpClient;
+    }
 
     /**
      * Creates a new DataSource instance
@@ -75,10 +84,10 @@ class DataSource {
             $endString = $startDate->add($length)->format($this->dateFormat);
         }
         // Perform HTTP request to the source url
-        $client = new Client(["base_uri" => $this->uri]);
+        $client = self::GetClient();
         // Define the request with the date range as query parameters
         $params = array_merge([$this->startName => $startString, $this->endName => $endString], $this->queryParameters ?? []);
-        $promise = $client->requestAsync('GET', '', [
+        $promise = $client->requestAsync('GET', $this->uri, [
             'query' => $params
         ]);
         $extra = $this->extra;
