@@ -133,5 +133,5 @@ function GetLongitude(HapiRecord $prediction): mixed {
 }
 
 function GetTime(HapiRecord $prediction): mixed {
-    return $prediction['NOAALocationTime'] ?? $prediction['CataniaLocationTime'] ?? $prediction['ModelLocationTime'];
+    return $prediction['NOAALocationTime'] ?? $prediction['CataniaLocationTime'] ?? $prediction['ModelLocationTime'] ?? $prediction['issue_time'];
 }

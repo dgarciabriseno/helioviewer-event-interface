@@ -11,14 +11,18 @@ final class FlarePredictionTest extends TestCase
     {
         $start = new DateTimeImmutable();
         $length = new DateInterval("P2D");
-
         $result = Events::GetFromSource(["CCMC"], $start, $length);
-        $flarePredictions = array_filter($result, function ($section) { return $section['name'] == 'Solar Flare Prediction'; })[0];
-        $sidc_group = array_filter($flarePredictions['groups'], function ($group) { return $group['name'] == 'SIDC Operator'; })[0];
-        foreach ($sidc_group['data'] as $prediction) {
-            $this->assertNotEquals(0.123456789, $prediction['hpc_x']);
-            $this->assertNotEquals(0.987654321, $prediction['hpc_y']);
+        $count = 0;
+        foreach ($result as $section) {
+            foreach ($section['groups'] as $group) {
+                foreach ($group['data'] as $record) {
+                    $count += 1;
+                    $this->assertNotEquals(0.123456789, $record['hpc_x']);
+                    $this->assertNotEquals(0.987654321, $record['hpc_y']);
+                }
+            }
         }
+        $this->assertTrue($count > 0);
     }
 }
 
