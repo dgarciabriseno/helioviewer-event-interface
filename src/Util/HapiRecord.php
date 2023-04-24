@@ -43,6 +43,14 @@ class HapiRecord implements ArrayAccess, JsonSerializable
         return $value;
     }
 
+    public function __get(string $name): mixed {
+        return $this[$name];
+    }
+
+    public function __isset(string $name): bool {
+        return $this->offsetExists($name);
+    }
+
     public function offsetExists(mixed $offset): bool
     {
         $index = array_search($offset, array_column($this->parameters, 'name'));

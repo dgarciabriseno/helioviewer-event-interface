@@ -2,6 +2,7 @@
 
 namespace HelioviewerEventInterface\FlarePrediction;
 
+use DateTime;
 use HelioviewerEventInterface\Coordinator\Hgs2Hpc;
 use HelioviewerEventInterface\Types\HelioviewerEvent;
 use HelioviewerEventInterface\Util\HapiRecord;
@@ -17,11 +18,23 @@ function Translate(array $data, string $method, ?callable $postProcessor): array
             'data' => []
         ]
     ];
-    $result = &$groups[0]['data'];
+    if (count($data['data']) == 0) {
+        return $groups;
+    }
+
     $parameters = $data['parameters'];
     $coord = new Hgs2Hpc();
-    foreach ($data['data'] as $record) {
-        $prediction = new HapiRecord($record, $parameters, "");
+    // Preprocess to only grab the latest predictions
+    $records = array_map(function ($record) use ($parameters) { return new HapiRecord($record, $parameters, ""); }, $data['data']);
+    $dateStrings = array_column($records, 'start_window');
+    $dateValues = array_map(function ($str) { return new DateTime($str); }, $dateStrings);
+    $latestDate = max(array_values($dateValues));
+    $result = &$groups[0]['data'];
+    foreach ($records as $prediction) {
+        $date = new DateTime($prediction['start_window']);
+        if ($date != $latestDate) {
+            continue;
+        }
         $event = new HelioviewerEvent();
         $event->id = hash('sha256', json_encode($prediction));
         $event->label = CreateLabel($prediction, $method);
