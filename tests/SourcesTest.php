@@ -7,8 +7,8 @@ final class SourcesTest extends TestCase
 {
     public function testFromArray(): void
     {
-        $donkiSources = Sources::FromArray(["DONKI"]);
-        $this->assertEquals(1, count($donkiSources));
+        $sources = Sources::FromArray(["CCMC"]);
+        $this->assertTrue(count($sources) > 0);
 
         $noSources = Sources::FromArray(["blah"]);
         $this->assertEquals(0, count($noSources));

@@ -43,9 +43,9 @@ final class EventsTest extends TestCase
      * Verifies that even if a source is given that doesn't exist, nothing will crash
      */
     public function testGetFromSource(): void {
-        $data = Events::GetFromSource(["DONKI"], $this->START_DATE, $this->LENGTH);
+        $data = Events::GetFromSource(["CCMC"], $this->START_DATE, $this->LENGTH);
         $this->assertTrue(is_array($data));
-        $this->assertEquals(1, count($data));
+        $this->assertEquals(2, count($data));
         $this->assertTrue(array_key_exists('groups', $data[0]));
         $this->assertEquals(8, count($data[0]['groups'][0]['data']));
     }
