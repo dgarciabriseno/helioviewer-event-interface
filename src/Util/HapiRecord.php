@@ -36,7 +36,7 @@ class HapiRecord implements ArrayAccess, JsonSerializable
         // Get the value of the field
         $value = $this->record[$index];
         // If the value matches the parameter's "fill" value, return null
-        if ($value === $this->parameters[$index]['fill']) {
+        if ($value == $this->parameters[$index]['fill']) {
             return null;
         }
         // Otherwise, return the value

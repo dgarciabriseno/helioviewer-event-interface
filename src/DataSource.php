@@ -65,12 +65,15 @@ class DataSource {
      */
     public function beginQuery(DateTimeInterface $start, DateInterval $length, ?callable $postprocessor = null) {
         // Convert input dates to strings
-        $startString = $start->format($this->dateFormat);
-        $startDate = DateTimeImmutable::createFromInterface($start);
         if ($this->reverse) {
-            $length->invert = 1;
+            $endString = $start->format($this->dateFormat);
+            $startDate = DateTimeImmutable::createFromInterface($start);
+            $startString = $startDate->sub($length)->format($this->dateFormat);
+        } else {
+            $startString = $start->format($this->dateFormat);
+            $startDate = DateTimeImmutable::createFromInterface($start);
+            $endString = $startDate->add($length)->format($this->dateFormat);
         }
-        $endString = $startDate->add($length)->format($this->dateFormat);
         // Perform HTTP request to the source url
         $client = new Client(["base_uri" => $this->uri]);
         // Define the request with the date range as query parameters
