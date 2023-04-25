@@ -38,6 +38,15 @@ class DataSource {
     }
 
     /**
+     * Generates a key that is unique to this data source
+     * @return string
+     */
+    public function GetCacheKey(): string {
+        $data = "$this->source $this->name " . json_encode($this->queryParameters) . json_encode($this->extra);
+        return strval(crc32($data));
+    }
+
+    /**
      * Creates a new DataSource instance
      * @param string $name The name of the source data. It's okay for this to be a duplicate of other sources
      * @param string $pin The pin to use for this specific resource
@@ -73,6 +82,18 @@ class DataSource {
      * @return PromiseInterface
      */
     public function beginQuery(DateTimeInterface $start, DateInterval $length, ?callable $postprocessor = null) {
+        $this->sendAsyncQuery($start, $length, $postprocessor);
+    }
+
+    /**
+     * Queries the data source asynchronously for relevant data between the start and end times.
+     * Use getResult() to get the response from the last query.
+     * @param DateTimeInterface $start Start of time range
+     * @param DateInterval $length Length of time to query
+     * @param callable $postprocessor Executable function to call on each Helioviewer Event processed during the query
+     * @return PromiseInterface
+     */
+    private function sendAsyncQuery(DateTimeInterface $start, DateInterval $length, ?callable $postprocessor = null) {
         // Convert input dates to strings
         if ($this->reverse) {
             $endString = $start->format($this->dateFormat);

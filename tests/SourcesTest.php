@@ -13,5 +13,14 @@ final class SourcesTest extends TestCase
         $noSources = Sources::FromArray(["blah"]);
         $this->assertEquals(0, count($noSources));
     }
+
+    public function testUniqueCacheKeys(): void {
+        $keys = [];
+        foreach (Sources::All() as $source) {
+            $key = $source->GetCacheKey();
+            $this->assertNotContains($key, $keys, 'Duplicate cache key found');
+            array_push($keys, $key);
+        }
+    }
 }
 
