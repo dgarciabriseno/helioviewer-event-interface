@@ -41,9 +41,13 @@ class DataSource {
      * Generates a key that is unique to this data source
      * @return string
      */
-    public function GetCacheKey(): string {
+    public function GetCacheKey(\DateTimeInterface $date, \DateInterval $interval): string {
+        // This should be unique across all data sources
         $data = "$this->source $this->name " . json_encode($this->queryParameters) . json_encode($this->extra);
-        return strval(crc32($data));
+        // Stop the date at hour so that caching occurs on the hour boundary.
+        // The interval uses the full interval value so that different time intervals result in different cache keys.
+        $data .= $date->format('Y-m-d H') . $interval->format('%Y%M%D%H%I%S');
+        return hash('sha256', $data);
     }
 
     /**
