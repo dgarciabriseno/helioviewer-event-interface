@@ -32,7 +32,7 @@ class Sources {
         $all = Sources::All();
         // Return all datasources where the source name is in the given source array
         return array_filter($all, function ($datasource) use ($sources) {
-            return in_array($datasource->source, $sources);
+            return in_array($datasource->source, $sources) || in_array($datasource->name, $sources);
         });
     }
 }
