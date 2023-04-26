@@ -9,6 +9,7 @@ use \Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Promise\PromiseInterface;
 use GuzzleHttp\Psr7\Request;
+use Psr\Cache\CacheItemInterface;
 use Psr\Http\Message\ResponseInterface;
 
 /**
@@ -27,6 +28,7 @@ class DataSource {
     protected string $translator;
     protected ?array $queryParameters;
     protected mixed  $extra;
+    private ?CacheItemInterface $cache = null;
     private PromiseInterface $request;
     private static ?Client $HttpClient = null;
 
@@ -86,7 +88,11 @@ class DataSource {
      * @return PromiseInterface
      */
     public function beginQuery(DateTimeInterface $start, DateInterval $length, ?callable $postprocessor = null) {
-        $this->sendAsyncQuery($start, $length, $postprocessor);
+        $this->cache = Cache::Get($this->GetCacheKey($start, $length));
+        // Only send the request on cache miss
+        if (!$this->cache->isHit()) {
+            $this->sendAsyncQuery($start, $length, $postprocessor);
+        }
     }
 
     /**
@@ -143,9 +149,18 @@ class DataSource {
      * This will block if the request is still ongoing.
      */
     public function getResult(): array {
+        // Check for the cached value and return it on a cache hit.
+        if (isset($this->cache) && $this->cache->isHit()) {
+            return $this->cache->get();
+        }
+
         if (isset($this->request)) {
             $groups = $this->request->wait();
-            return $this->BuildEventCategory($groups);
+            $result = $this->BuildEventCategory($groups);
+            // Cache item must be set during beginQuery even if its a cache miss.
+            $key = $this->cache->getKey();
+            Cache::Set($key, new DateInterval("P2W"), $result);
+            return $result;
         }
         error_log("Attempted to get the result without calling beginQuery");
         return $this->BuildEventCategory(null);

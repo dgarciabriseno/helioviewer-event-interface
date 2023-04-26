@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 
+use HelioviewerEventInterface\Cache;
 use HelioviewerEventInterface\DataSource;
-use HelioviewerEventInterface\Translator\Translator;
 use PHPUnit\Framework\TestCase;
 
 final class DataSourceTest extends TestCase
@@ -43,6 +43,20 @@ final class DataSourceTest extends TestCase
         $datasource->beginQuery($start, $end);
         $group = $datasource->getResult();
         $this->assertCount(0, $group['groups']);
+    }
+
+    public function testCachedQuery(): void {
+        $start = new DateTimeImmutable("2023-04-05T20:20:00Z");
+        $length = new DateInterval("P1D");
+
+        $datasource = new DataSource("Donki", "CME", "CE", "https://kauai.ccmc.gsfc.nasa.gov/DONKI/WS/get/CME", "startDate", "endDate", "Y-m-d", false, "DonkiCme");
+        $datasource->beginQuery($start, $length);
+        $group = $datasource->getResult();
+        // Now assert this result has been cached
+        $key = $datasource->GetCacheKey($start, $length);
+        $item = Cache::Get($key);
+        $this->assertTrue($item->isHit());
+        $this->assertEquals($group, $item->get());
     }
 }
 
