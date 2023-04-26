@@ -47,6 +47,13 @@ function Translate(array $data, string $method, ?callable $postProcessor): array
             ['name' => 'Flare Prediction',
             'content' => $event->source]
         ];
+        $lat = GetLatitude($prediction);
+        $long = GetLongitude($prediction);
+        $time = GetTime($prediction);
+        // If there's no positional information, then skip this entry.
+        if (is_null($lat) || is_null($long) || is_null($time)) {
+            continue;
+        }
         $hpc = $coord->convert(GetLatitude($prediction), GetLongitude($prediction), GetTime($prediction));
         $event->hpc_x = $hpc['x'];
         $event->hpc_y = $hpc['y'];
