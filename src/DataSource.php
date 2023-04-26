@@ -9,7 +9,6 @@ use \DateTimeInterface;
 use \Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Promise\PromiseInterface;
-use GuzzleHttp\Psr7\Request;
 use Psr\Cache\CacheItemInterface;
 use Psr\Http\Message\ResponseInterface;
 
