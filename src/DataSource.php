@@ -47,10 +47,7 @@ class DataSource {
     public function GetCacheKey(\DateTimeInterface $date, \DateInterval $interval): string {
         // This should be unique across all data sources
         $data = "$this->source $this->name " . json_encode($this->queryParameters) . json_encode($this->extra);
-        // Stop the date at hour so that caching occurs on the hour boundary.
-        // The interval uses the full interval value so that different time intervals result in different cache keys.
-        $data .= $date->format('Y-m-d H') . $interval->format('%Y%M%D%H%I%S');
-        return hash('sha256', $data);
+        return Cache::CreateKey($data, $date, $interval);
     }
 
     /**
@@ -168,7 +165,7 @@ class DataSource {
             $result = $this->BuildEventCategory($groups);
             // Cache item must be set during beginQuery even if its a cache miss.
             $key = $this->cache->getKey();
-            Cache::Set($key, new DateInterval("P2W"), $result);
+            Cache::Set($key, Cache::DefaultExpiry(), $result);
             return $result;
         }
         error_log("Attempted to get the result without calling beginQuery");
