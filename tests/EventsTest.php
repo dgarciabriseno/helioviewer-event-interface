@@ -80,7 +80,6 @@ final class EventsTest extends TestCase
                 touch($tmpdir . "/parent");
                 return $e;
             });
-            error_log("Finished parent\n");
         } else {
             // Child process. This should run in parallel with the parent process.
             // When the post processor runs, create a temp file in the temp directory
@@ -88,7 +87,6 @@ final class EventsTest extends TestCase
                 touch($tmpdir . "/child");
                 return $e;
             });
-            error_log("Finished child\n");
             // End the child process here.
             exit;
         }
