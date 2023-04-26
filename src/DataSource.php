@@ -28,7 +28,7 @@ class DataSource {
     protected string $translator;
     protected ?array $queryParameters;
     protected mixed  $extra;
-    protected DateInterval $cacheExpiry = new DateInterval("P1D");
+    protected DateInterval $cacheExpiry;
     private ?CacheItemInterface $cache = null;
     private PromiseInterface $request;
     private static ?Client $HttpClient = null;
@@ -75,6 +75,7 @@ class DataSource {
         $this->translator = $translator;
         $this->queryParameters = $queryParameters;
         $this->extra = $extra;
+        $this->cacheExpiry = new DateInterval("P1D");
     }
 
     /**

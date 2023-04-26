@@ -15,24 +15,21 @@ use HelioviewerEventInterface\Util\Subarray;
 class IgnoreCme extends Exception {}
 
 function Translate(array $data, mixed $extra, ?callable $postProcessor): array {
-    $groups = [];
+    $groups = [
+        [
+            'name' => "CME",
+            'contact' => 'Space Weather Database of NOtifications, Knowledge, Information (DONKI)',
+            'url' => 'https://kauai.ccmc.gsfc.nasa.gov/DONKI/',
+            'data' => []
+        ]
+    ];
     // Breaking encapsulation a bit... but creating one overall Hgs2Hpc instance means it will reuse the socket connection for each record.
     // This should give a slight performance improvement since it doesn't need to create a new connection for each record.
     $hgs2hpc = new Hgs2Hpc();
     foreach ($data as $record) {
         try {
             $cme = TranslateCME($record, $hgs2hpc, $postProcessor);
-            // If the group doesn't exist already in the group list, then create it.
-            if (!array_key_exists($record['catalog'], $groups)) {
-                $groups[$record['catalog']] = [
-                    'name' => $record['catalog'],
-                    'contact' => 'Space Weather Database of NOtifications, Knowledge, Information (DONKI)',
-                    'url' => 'https://kauai.ccmc.gsfc.nasa.gov/DONKI/',
-                    'data' => []
-                ];
-            }
-            $group = &$groups[$record['catalog']];
-            array_push($group['data'], $cme);
+            array_push($groups[0]['data'], $cme);
         }
         catch (IgnoreCme) {
             continue;
