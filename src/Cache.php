@@ -11,6 +11,7 @@ use Symfony\Component\Cache\Adapter\RedisAdapter;
 use Symfony\Contracts\Cache\ItemInterface;
 
 class Cache {
+    const VERSION = "cache-1.0";
     private static ?RedisAdapter $CacheInstance = null;
     private static function GetCacheInstance(): RedisAdapter {
         if (is_null(self::$CacheInstance)) {
@@ -21,8 +22,16 @@ class Cache {
         return self::$CacheInstance;
     }
 
-    public static function DefaultExpiry(): DateInterval {
-        return new DateInterval("P2W");
+    public static function DefaultExpiry(DateTimeInterface $date): DateInterval {
+        $one_week_ago = new DateTime();
+        $one_week_ago->sub(new DateInterval('P1W'));
+        // For dates up to 1 week old, refresh the cache daily since new information may be added.
+        if ($date > $one_week_ago) {
+            return new DateInterval("P1D");
+        } else {
+            // For older dates, set it to stay in the cache for up to 2 weeks
+            return new DateInterval("P2W");
+        }
     }
 
     /**
@@ -51,7 +60,7 @@ class Cache {
         // Stop the date at hour so that caching occurs on the hour boundary.
         // The interval uses the full interval value so that different time intervals result in different cache keys.
         $id .= $date->format('Y-m-d H') . $interval->format('%Y%M%D%H%I%S');
-        return hash('sha256', $id);
+        return self::VERSION . "_" . hash('sha256', $id);
     }
 
     /**

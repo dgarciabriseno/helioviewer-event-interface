@@ -22,7 +22,7 @@ class Events
     public static function GetAll(DateTimeInterface $start, DateInterval $length, ?callable $postprocessor = null): array {
         $start = Cache::RoundDate($start);
         $key = self::GetCacheKey("AllSources", $start, $length);
-        return Cache::GetWithLock($key, Cache::DefaultExpiry(), function () use ($start, $length, $postprocessor) {
+        return Cache::GetWithLock($key, Cache::DefaultExpiry($start), function () use ($start, $length, $postprocessor) {
             return Events::Get($start, $length, Sources::All(), $postprocessor);
         });
     }
@@ -37,7 +37,7 @@ class Events
         sort($sources);
         $key = self::GetCacheKey(json_encode($sources), $start, $length);
         $sources = Sources::FromArray($sources);
-        return Cache::GetWithLock($key, Cache::DefaultExpiry(), function () use ($sources, $start, $length, $postprocessor) {
+        return Cache::GetWithLock($key, Cache::DefaultExpiry($start), function () use ($sources, $start, $length, $postprocessor) {
             return Events::Get($start, $length, $sources, $postprocessor);
         });
     }

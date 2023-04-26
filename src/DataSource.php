@@ -28,6 +28,7 @@ class DataSource {
     protected string $translator;
     protected ?array $queryParameters;
     protected mixed  $extra;
+    protected DateInterval $cacheExpiry;
     private ?CacheItemInterface $cache = null;
     private PromiseInterface $request;
     private static ?Client $HttpClient = null;
@@ -74,6 +75,7 @@ class DataSource {
         $this->translator = $translator;
         $this->queryParameters = $queryParameters;
         $this->extra = $extra;
+        $this->cacheExpiry = new DateInterval("P1D");
     }
 
     /**
@@ -87,6 +89,7 @@ class DataSource {
     public function beginQuery(DateTimeInterface $start, DateInterval $length, ?callable $postprocessor = null) {
         $roundedDateTime = Cache::RoundDate($start);
         $this->cache = Cache::Get($this->GetCacheKey($roundedDateTime, $length));
+        $this->cacheExpiry = Cache::DefaultExpiry($roundedDateTime);
         // Only send the request on cache miss
         if (!$this->cache->isHit()) {
             $this->sendAsyncQuery($roundedDateTime, $length, $postprocessor);
@@ -157,7 +160,7 @@ class DataSource {
             $result = $this->BuildEventCategory($groups);
             // Cache item must be set during beginQuery even if its a cache miss.
             $key = $this->cache->getKey();
-            Cache::Set($key, Cache::DefaultExpiry(), $result);
+            Cache::Set($key, $this->cacheExpiry, $result);
             return $result;
         }
         error_log("Attempted to get the result without calling beginQuery");
