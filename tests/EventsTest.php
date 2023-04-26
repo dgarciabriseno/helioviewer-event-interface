@@ -14,8 +14,7 @@ final class EventsTest extends TestCase
         $this->LENGTH = new DateInterval('P1D');
     }
 
-    protected function setUp(): void
-    {
+    protected function setUp(): void {
         Cache::Clear();
     }
 
@@ -82,14 +81,26 @@ final class EventsTest extends TestCase
             });
         } else {
             // Child process. This should run in parallel with the parent process.
-            // When the post processor runs, create a temp file in the temp directory
-            Events::GetFromSource(["DONKI"], $this->START_DATE, $this->LENGTH, function ($e) use ($tmpdir) {
-                touch($tmpdir . "/child");
-                return $e;
+            // There is a known issue with using cURL (used by underlying libraries) after forking.
+            // See https://stackoverflow.com/questions/26285311/ssl-requests-made-with-curl-fail-after-process-fork
+            // So to workaround this, place the following PHP code into a new file and execute it.
+            file_put_contents($tmpdir . "/child_process.php", "<?php
+            include_once '".__DIR__."/../vendor/autoload.php';
+            include_once '".__DIR__."/bootstrap.php';
+            use HelioviewerEventInterface\Events;
+            \$date = new DateTime('2023-04-01');
+            \$interval = new DateInterval('P1D');
+            Events::GetFromSource(['DONKI'], \$date, \$interval, function (\$e) {
+                touch('$tmpdir/child');
+                return \$e;
             });
-            // End the child process here.
+            touch('$tmpdir/child_success');
+            ");
+            pcntl_exec("/usr/bin/env", ["php", "$tmpdir/child_process.php"]);
             exit;
         }
+        // wait for child process to finish
+        pcntl_wait($ignore);
 
         // Now if the lock is working, then only one file will be created.
         // This is because one of the above functions will race to get the cache lock.
@@ -98,8 +109,16 @@ final class EventsTest extends TestCase
         // Only one will perform the request and postprocessing.
         $files = scandir($tmpdir);
         // Remove the linux . and .. from the list
-        $files = array_diff($files, ['.', '..']);
-        $this->assertCount(1, $files);
+        $files = array_diff($files, ['.', '..', 'child_process.php', 'child_success']);
+        // Verify the child script executed successfully.
+        $this->assertFileExists($tmpdir . "/child_success");
+        // If the parent postprocessor ran, then make sure the child postprocessor didn't run
+        if (file_exists("$tmpdir/parent")) {
+            $this->assertFileDoesNotExist("$tmpdir/child");
+        } else {
+            // If the child postprocessor ran, make sure the parent did not.
+            $this->assertFileDoesNotExist("$tmpdir/parent");
+        }
     }
 }
 
