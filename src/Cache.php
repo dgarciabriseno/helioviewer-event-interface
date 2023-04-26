@@ -3,6 +3,7 @@
 namespace HelioviewerEventInterface;
 
 use \DateInterval;
+use \DateTime;
 use \DateTimeInterface;
 use \Redis;
 use Psr\Cache\CacheItemInterface;
@@ -22,6 +23,20 @@ class Cache {
 
     public static function DefaultExpiry(): DateInterval {
         return new DateInterval("P2W");
+    }
+
+    /**
+     * Rounds the given date to the nearest hour.
+     */
+    public static function RoundDate(DateTimeInterface $date): DateTimeInterface {
+        // Round query date to the nearest hour
+        $roundedDateTime = new DateTime();
+        // dividing by 3600 (1 hour) will give a float where the decimal portion is the minutes/seconds
+        // Rounding this will round the time to the nearest hour
+        // Then multiply back by 3600 to get a valid date
+        $roundedTimestamp = intval(round($date->getTimestamp() / 3600) * 3600);
+        $roundedDateTime->setTimestamp($roundedTimestamp);
+        return $roundedDateTime;
     }
 
     /**

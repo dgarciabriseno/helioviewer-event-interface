@@ -20,6 +20,7 @@ class Events
      * Returns all data provided by the event interface.
      */
     public static function GetAll(DateTimeInterface $start, DateInterval $length, ?callable $postprocessor = null): array {
+        $start = Cache::RoundDate($start);
         $key = self::GetCacheKey("AllSources", $start, $length);
         return Cache::GetWithLock($key, Cache::DefaultExpiry(), function () use ($start, $length, $postprocessor) {
             return Events::Get($start, $length, Sources::All(), $postprocessor);
@@ -31,6 +32,7 @@ class Events
      * @param array $sources Array of strings that name the sources to query.
      */
     public static function GetFromSource(array $sources, DateTimeInterface $start, DateInterval $length, ?callable $postprocessor = null): array {
+        $start = Cache::RoundDate($start);
         // Sort first so that the same sources will return the same cache key.
         sort($sources);
         $key = self::GetCacheKey(json_encode($sources), $start, $length);

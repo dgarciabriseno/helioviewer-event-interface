@@ -85,14 +85,7 @@ class DataSource {
      * @return PromiseInterface
      */
     public function beginQuery(DateTimeInterface $start, DateInterval $length, ?callable $postprocessor = null) {
-        // Round query date to the nearest hour
-        $roundedDateTime = new DateTime();
-        // dividing by 3600 (1 hour) will give a float where the decimal portion is the minutes/seconds
-        // Rounding this will round the time to the nearest hour
-        // Then multiply back by 3600 to get a valid date
-        $roundedTimestamp = intval(round($start->getTimestamp() / 3600) * 3600);
-        $roundedDateTime->setTimestamp($roundedTimestamp);
-
+        $roundedDateTime = Cache::RoundDate($start);
         $this->cache = Cache::Get($this->GetCacheKey($roundedDateTime, $length));
         // Only send the request on cache miss
         if (!$this->cache->isHit()) {
