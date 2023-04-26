@@ -5,13 +5,14 @@
     "bin": ["bin/hgs2hpc.py", "bin/start_hgs2hpc"],
     "license": "MPL-2.0",
     "scripts": {
-        "test": "vendor/bin/phpunit --fail-on-warning tests"
+        "test": "vendor/bin/phpunit --bootstrap tests/bootstrap.php --fail-on-warning tests"
     },
     "autoload": {
         "psr-4": {"HelioviewerEventInterface\\": "src/"}
     },
     "require": {
-        "guzzlehttp/guzzle": "^7.5"
+        "guzzlehttp/guzzle": "^7.5",
+        "symfony/cache": "^6.0"
     },
     "require-dev": {
         "phpunit/phpunit": "^9.6"
