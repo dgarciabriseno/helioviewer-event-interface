@@ -11,6 +11,7 @@ use Symfony\Component\Cache\Adapter\RedisAdapter;
 use Symfony\Contracts\Cache\ItemInterface;
 
 class Cache {
+    const VERSION = "cache-1.0";
     private static ?RedisAdapter $CacheInstance = null;
     private static function GetCacheInstance(): RedisAdapter {
         if (is_null(self::$CacheInstance)) {
@@ -59,7 +60,7 @@ class Cache {
         // Stop the date at hour so that caching occurs on the hour boundary.
         // The interval uses the full interval value so that different time intervals result in different cache keys.
         $id .= $date->format('Y-m-d H') . $interval->format('%Y%M%D%H%I%S');
-        return hash('sha256', $id);
+        return self::VERSION . "_" . hash('sha256', $id);
     }
 
     /**
