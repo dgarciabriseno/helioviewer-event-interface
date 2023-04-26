@@ -38,7 +38,7 @@ new DataSource("CCMC", "Flare Scorebard", "FP", "https://iswa.gsfc.nasa.gov/Iswa
 
 The parameters describe the source, label for the data, pin to use on Helioviewer, and other information required to make the HTTP request.
 
-2. We have also created `src/Translator/FlarePrediction.php`
+2. We have also created `src/Translator/FlarePrediction.php`. This file defines a function named `Translate` which will accept the data from the API request, and parse it into the Helioviewer event format.
 ```php
 function Translate(array $data, string $method, ?callable $postProcessor): array {
     $groups = [
