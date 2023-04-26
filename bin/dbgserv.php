@@ -1,6 +1,8 @@
 <?php
 
 include_once __DIR__."/../vendor/autoload.php";
+include_once __DIR__."/../tests/bootstrap.php";
+
 use HelioviewerEventInterface\Events;
 
 $sources = $_GET['sources'] ?? null;
