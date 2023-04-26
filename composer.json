@@ -5,7 +5,7 @@
     "bin": ["bin/hgs2hpc.py", "bin/start_hgs2hpc"],
     "license": "MPL-2.0",
     "scripts": {
-        "test": "vendor/bin/phpunit --fail-on-warning tests"
+        "test": "vendor/bin/phpunit --bootstrap tests/bootstrap.php --fail-on-warning tests"
     },
     "autoload": {
         "psr-4": {"HelioviewerEventInterface\\": "src/"}
