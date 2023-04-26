@@ -58,5 +58,18 @@ final class DataSourceTest extends TestCase
         $this->assertTrue($item->isHit());
         $this->assertEquals($group, $item->get());
     }
+
+    public function testDateRounding(): void {
+        $datasource = new DataSource("Donki", "CME", "CE", "https://kauai.ccmc.gsfc.nasa.gov/DONKI/WS/get/CME", "startDate", "endDate", "Y-m-d", false, "DonkiCme");
+        $roundDownStart = new DateTimeImmutable("2021-12-09T23:29:59Z");
+        $length = new DateInterval("P1D");
+        $datasource->beginQuery($roundDownStart, $length);
+        $downGroup = $datasource->getResult();
+
+        $roundUpStart = new DateTimeImmutable("2021-12-09T23:30:00Z");
+        $datasource->beginQuery($roundUpStart, $length);
+        $upGroup = $datasource->getResult();
+        $this->assertNotEquals($downGroup, $upGroup);
+    }
 }
 

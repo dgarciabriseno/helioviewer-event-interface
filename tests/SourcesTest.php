@@ -1,5 +1,6 @@
 <?php declare(strict_types=1);
 
+use HelioviewerEventInterface\Events;
 use HelioviewerEventInterface\Sources;
 use PHPUnit\Framework\TestCase;
 
@@ -50,6 +51,12 @@ final class SourcesTest extends TestCase
             $key = $source->GetCacheKey($newDate, $interval);
             $this->assertContains($key, $keys);
         }
+    }
+
+    public function testInvalidLocation(): void {
+        $start = new DateTime("2021-12-09T23:01:53Z");
+        $interval = new DateInterval("P1D");
+        Events::GetAll($start, $interval);
     }
 }
 
