@@ -9,7 +9,6 @@ use \DateTimeInterface;
 use \Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Promise\PromiseInterface;
-use GuzzleHttp\Psr7\Request;
 use Psr\Cache\CacheItemInterface;
 use Psr\Http\Message\ResponseInterface;
 
@@ -47,10 +46,7 @@ class DataSource {
     public function GetCacheKey(\DateTimeInterface $date, \DateInterval $interval): string {
         // This should be unique across all data sources
         $data = "$this->source $this->name " . json_encode($this->queryParameters) . json_encode($this->extra);
-        // Stop the date at hour so that caching occurs on the hour boundary.
-        // The interval uses the full interval value so that different time intervals result in different cache keys.
-        $data .= $date->format('Y-m-d H') . $interval->format('%Y%M%D%H%I%S');
-        return hash('sha256', $data);
+        return Cache::CreateKey($data, $date, $interval);
     }
 
     /**
@@ -89,14 +85,7 @@ class DataSource {
      * @return PromiseInterface
      */
     public function beginQuery(DateTimeInterface $start, DateInterval $length, ?callable $postprocessor = null) {
-        // Round query date to the nearest hour
-        $roundedDateTime = new DateTime();
-        // dividing by 3600 (1 hour) will give a float where the decimal portion is the minutes/seconds
-        // Rounding this will round the time to the nearest hour
-        // Then multiply back by 3600 to get a valid date
-        $roundedTimestamp = intval(round($start->getTimestamp() / 3600) * 3600);
-        $roundedDateTime->setTimestamp($roundedTimestamp);
-
+        $roundedDateTime = Cache::RoundDate($start);
         $this->cache = Cache::Get($this->GetCacheKey($roundedDateTime, $length));
         // Only send the request on cache miss
         if (!$this->cache->isHit()) {
@@ -168,7 +157,7 @@ class DataSource {
             $result = $this->BuildEventCategory($groups);
             // Cache item must be set during beginQuery even if its a cache miss.
             $key = $this->cache->getKey();
-            Cache::Set($key, new DateInterval("P2W"), $result);
+            Cache::Set($key, Cache::DefaultExpiry(), $result);
             return $result;
         }
         error_log("Attempted to get the result without calling beginQuery");

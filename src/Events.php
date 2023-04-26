@@ -12,14 +12,19 @@ use HelioviewerEventInterface\Sources;
  */
 class Events
 {
+    protected static function GetCacheKey(string $sources, DateTimeInterface $date, DateInterval $length): string {
+        return Cache::CreateKey($sources, $date, $length);
+    }
+
     /**
      * Returns all data provided by the event interface.
      */
-    public static function GetAll(DateTimeInterface $start, DateInterval $length, ?callable $postprocessor = null, array $sources = null): array {
-        if (is_null($sources)) {
-            $sources = Sources::All();
-        }
-        return Events::Get($start, $length, $sources, $postprocessor);
+    public static function GetAll(DateTimeInterface $start, DateInterval $length, ?callable $postprocessor = null): array {
+        $start = Cache::RoundDate($start);
+        $key = self::GetCacheKey("AllSources", $start, $length);
+        return Cache::GetWithLock($key, Cache::DefaultExpiry(), function () use ($start, $length, $postprocessor) {
+            return Events::Get($start, $length, Sources::All(), $postprocessor);
+        });
     }
 
     /**
@@ -27,8 +32,14 @@ class Events
      * @param array $sources Array of strings that name the sources to query.
      */
     public static function GetFromSource(array $sources, DateTimeInterface $start, DateInterval $length, ?callable $postprocessor = null): array {
+        $start = Cache::RoundDate($start);
+        // Sort first so that the same sources will return the same cache key.
+        sort($sources);
+        $key = self::GetCacheKey(json_encode($sources), $start, $length);
         $sources = Sources::FromArray($sources);
-        return Events::Get($start, $length, $sources, $postprocessor);
+        return Cache::GetWithLock($key, Cache::DefaultExpiry(), function () use ($sources, $start, $length, $postprocessor) {
+            return Events::Get($start, $length, $sources, $postprocessor);
+        });
     }
 
     /**
