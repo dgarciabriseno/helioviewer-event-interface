@@ -5,8 +5,7 @@ This module provides a standard framework for integrating external data.
 In general, new data sources can be added in 2 steps:
 
 1. Add a URI to the list of known data sources. See `src/Sources.php`. This provides an endpoint to query data from.
-2. Create a definition that describes how to translate data into Helioviewer's format. See `Translator/DonkiCme` as the original sample.
-   This
+2. Create a definition that describes how to translate data into Helioviewer's format. See `Translator/FlarePrediction.php` as an sample.
 
 This module manages performing the external HTTP requests and passing that data over to a user-defined translator which converts the data into the Helioviewer Event Format to be processed on helioviewer.org.
 It also provides a standard framework to follow for translating one object into Helioviewer.
@@ -30,11 +29,64 @@ The goal for this project is to facilitate in translating these datasets into He
 Special note for #3, coordinates must be specified either in Helioprojective Coordinates or Solar Latitude and Longitude.
 
 # Example
-As an example, this is how DONKI's CME API is being integrated via this Event Interface
+As an example, this is how flare predictions are integrated via this Event Interface
 
 1. In `src/Sources.php`, we have added:
 ```php
-new DataSource("DONKI", "Coronal Mass Ejection", "C3", "https://kauai.ccmc.gsfc.nasa.gov/DONKI/WS/get/CME", "startDate", "endDate", "Y-m-d", "DonkiCme"),
+new DataSource("CCMC", "Flare Scorebard", "FP", "https://iswa.gsfc.nasa.gov/IswaSystemWebApp/flarescoreboard/hapi/data", "time.min", "time.max", "Y-m-d\TH:i:s", true, "FlarePrediction", ["id" => "SIDC_Operator_REGIONS", "format" => "json", "include" => "header"], "SIDC Operator"),
+```
+
+The parameters describe the source, label for the data, pin to use on Helioviewer, and other information required to make the HTTP request.
+
+2. We have also created `src/Translator/FlarePrediction.php`. This file defines a function named `Translate` which will accept the data from the API request, and parse it into the Helioviewer event format.
+```php
+function Translate(array $data, string $method, ?callable $postProcessor): array {
+    $groups = [
+        [
+            'name' => $method,
+            'contact' => "",
+            'url' => "https://ccmc.gsfc.nasa.gov/scoreboards/flare/",
+            'data' => []
+        ]
+    ];
+    if (count($data['data']) == 0) {
+        return $groups;
+    }
+
+    $parameters = $data['parameters'];
+    $coord = new Hgs2Hpc();
+    // Preprocess to only grab the latest predictions
+    $result = &$groups[0]['data'];
+    foreach ($records as $prediction) {
+        $event = new HelioviewerEvent();
+        $event->id = hash('sha256', json_encode($prediction));
+        $event->label = CreateLabel($prediction, $method);
+        $event->version = "";
+        $event->type = "FP";
+        $event->start = $prediction['start_window'];
+        $event->end = $prediction['end_window'];
+        $event->source = $prediction->jsonSerialize();
+        $event->views = [
+            ['name' => 'Flare Prediction',
+            'content' => $event->source]
+        ];
+        $lat = GetLatitude($prediction);
+        $long = GetLongitude($prediction);
+        $time = GetTime($prediction);
+        // If there's no positional information, then skip this entry.
+        if (is_null($lat) || is_null($long) || is_null($time)) {
+            continue;
+        }
+        $hpc = $coord->convert(GetLatitude($prediction), GetLongitude($prediction), GetTime($prediction));
+        $event->hpc_x = $hpc['x'];
+        $event->hpc_y = $hpc['y'];
+        if ($postProcessor) {
+            $event = $postProcessor($event);
+        }
+        array_push($result, (array) $event);
+    }
+    return $groups;
+}
 ```
 
 
