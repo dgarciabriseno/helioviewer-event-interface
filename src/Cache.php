@@ -17,6 +17,7 @@ class Cache {
         if (is_null(self::$CacheInstance)) {
             $redis = new Redis();
             $redis->connect(HV_REDIS_HOST, HV_REDIS_PORT);
+            $redis->select(HV_REDIS_DB ?? 10);
             self::$CacheInstance = new RedisAdapter($redis);
         }
         return self::$CacheInstance;
@@ -115,12 +116,14 @@ class Cache {
      */
     public static function Clear(): void {
         $redis = new Redis();
+        $redis->select(HV_REDIS_DB ?? 10);
         $redis->connect(HV_REDIS_HOST, HV_REDIS_PORT);
         $redis->flushAll();
     }
 
     public static function ClearKey(string $key): void {
         $redis = new Redis();
+        $redis->select(HV_REDIS_DB ?? 10);
         $redis->connect(HV_REDIS_HOST, HV_REDIS_PORT);
         $redis->del($key);
     }
