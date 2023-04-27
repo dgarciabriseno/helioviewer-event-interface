@@ -42,6 +42,9 @@ class Events
      * @param array $sources Array of strings that name the sources to query.
      */
     public static function GetFromSource(array $sources, DateTimeInterface $start, DateInterval $length, ?callable $postprocessor = null): array {
+        if (count($sources) == 0) {
+            return [];
+        }
         $start = Cache::RoundDate($start);
         // Sort first so that the same sources will return the same cache key.
         $key = self::GetCacheKey($start, $length, $sources);
