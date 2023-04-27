@@ -14,7 +14,7 @@ class IgnoreFlare extends Exception {}
 function Translate(array $flares, mixed $extra, ?callable $postProcessor): array {
     $groups = [
         [
-            'name' => 'Flares',
+            'name' => 'Solar Flares',
             'contact' => '',
             'url' => 'https://kauai.ccmc.gsfc.nasa.gov/DONKI/',
             'data' => []
