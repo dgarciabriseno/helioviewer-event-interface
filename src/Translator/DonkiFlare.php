@@ -28,7 +28,7 @@ function Translate(array $flares, mixed $extra, ?callable $postProcessor): array
         $event->id = $flare->id();
         $event->label = $flare->label();
         $event->version = '';
-        $event->type = 'FP';
+        $event->type = 'FL';
         $event->start = $flare->start();
         $event->end = $flare->end();
         $event->source = $flare->flare;
