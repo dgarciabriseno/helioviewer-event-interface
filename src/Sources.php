@@ -11,7 +11,8 @@ class Sources {
     public static function All() {
         return [
             // Using "C3" instead of "CE" because this abbreviation needs to be unique across all data sources and CE is taken by HEK
-            new DataSource("CCMC", "DONKI", "C3", "https://kauai.ccmc.gsfc.nasa.gov/DONKI/WS/get/CME", "startDate", "endDate", "Y-m-d", false, "DonkiCme"),
+            new DataSource("CCMC", "DONKI", "C3", "https://kauai.ccmc.gsfc.nasa.gov/DONKI/WS/get/CME", "startDate", "endDate", "Y-m-d", true, "DonkiCme"),
+            new DataSource("Flares", "Solar Flare", "F1", "https://kauai.ccmc.gsfc.nasa.gov/DONKI/WS/get/FLR", "startDate", "endDate", "Y-m-d", true, "DonkiFlare"),
             new DataSource("CCMC", "Solar Flare Predictions", "FP", "https://iswa.gsfc.nasa.gov/IswaSystemWebApp/flarescoreboard/hapi/data", "time.min", "time.max", "Y-m-d\TH:i:s", true, "FlarePrediction", ["id" => "SIDC_Operator_REGIONS", "format" => "json", "include" => "header"], "SIDC Operator"),
             new DataSource("CCMC", "Solar Flare Predictions", "FP", "https://iswa.gsfc.nasa.gov/IswaSystemWebApp/flarescoreboard/hapi/data", "time.min", "time.max", "Y-m-d\TH:i:s", true, "FlarePrediction", ["id" => "BoM_flare1_REGIONS", "format" => "json", "include" => "header"], "Bureau of Meteorology"),
             new DataSource("CCMC", "Solar Flare Predictions", "FP", "https://iswa.gsfc.nasa.gov/IswaSystemWebApp/flarescoreboard/hapi/data", "time.min", "time.max", "Y-m-d\TH:i:s", true, "FlarePrediction", ["id" => "AMOS_v1_REGIONS", "format" => "json", "include" => "header"], "AMOS"),
