@@ -106,8 +106,8 @@ class DonkiCme {
 
             $east_west = $location[3];
             $east_west_value = intval(substr($location, 4, 2));
-            // East Positive, West Negative
-            $this->longitude = $east_west == "E" ? $east_west_value : -$east_west_value;
+            // East Negative, West Positive
+            $this->longitude = $east_west == "E" ? -$east_west_value : $east_west_value;
         }
         if (!isset($this->latitude) || !isset($this->longitude)) {
             throw new IgnoreCme("Unknown location, can't display on Helioviewer");
