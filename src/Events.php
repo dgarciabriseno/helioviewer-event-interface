@@ -12,8 +12,18 @@ use HelioviewerEventInterface\Sources;
  */
 class Events
 {
-    protected static function GetCacheKey(string $sources, DateTimeInterface $date, DateInterval $length): string {
-        return Cache::CreateKey($sources, $date, $length);
+    public static function ClearCache(DateTimeInterface $date, DateInterval $length, array $sources = ["AllSources"]): void {
+        $key = self::GetCacheKey($date, $length, $sources);
+        Cache::ClearKey($key);
+    }
+
+    protected static function GetCacheKey(DateTimeInterface $date, DateInterval $length, array $sources = ["AllSources"]): string {
+        sort($sources);
+        if ($sources[0] == 'AllSources') {
+            return Cache::CreateKey('AllSources', $date, $length);
+        } else {
+            return Cache::CreateKey(json_encode($sources), $date, $length);
+        }
     }
 
     /**
@@ -21,7 +31,7 @@ class Events
      */
     public static function GetAll(DateTimeInterface $start, DateInterval $length, ?callable $postprocessor = null): array {
         $start = Cache::RoundDate($start);
-        $key = self::GetCacheKey("AllSources", $start, $length);
+        $key = self::GetCacheKey($start, $length);
         return Cache::GetWithLock($key, Cache::DefaultExpiry($start), function () use ($start, $length, $postprocessor) {
             return Events::Get($start, $length, Sources::All(), $postprocessor);
         });
@@ -34,8 +44,7 @@ class Events
     public static function GetFromSource(array $sources, DateTimeInterface $start, DateInterval $length, ?callable $postprocessor = null): array {
         $start = Cache::RoundDate($start);
         // Sort first so that the same sources will return the same cache key.
-        sort($sources);
-        $key = self::GetCacheKey(json_encode($sources), $start, $length);
+        $key = self::GetCacheKey($start, $length, $sources);
         $sources = Sources::FromArray($sources);
         return Cache::GetWithLock($key, Cache::DefaultExpiry($start), function () use ($sources, $start, $length, $postprocessor) {
             return Events::Get($start, $length, $sources, $postprocessor);
