@@ -47,7 +47,7 @@ class DataSource {
     public function GetCacheKey(\DateTimeInterface $date, \DateInterval $interval): string {
         // This should be unique across all data sources
         $data = "$this->source $this->name " . json_encode($this->queryParameters) . json_encode($this->extra);
-        return Cache::CreateKey($data, $date, $interval);
+        return Cache::CreateKey($data, $date, $interval, $this->dateFormat);
     }
 
     /**

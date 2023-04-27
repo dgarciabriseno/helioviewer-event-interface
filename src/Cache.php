@@ -11,7 +11,7 @@ use Symfony\Component\Cache\Adapter\RedisAdapter;
 use Symfony\Contracts\Cache\ItemInterface;
 
 class Cache {
-    const VERSION = "cache-1.0";
+    const VERSION = "cache-2.0";
     private static ?RedisAdapter $CacheInstance = null;
     private static function GetCacheInstance(): RedisAdapter {
         if (is_null(self::$CacheInstance)) {
@@ -55,12 +55,21 @@ class Cache {
      * @param DateTimeInterface $date Date to integrate into the resulting key
      * @param DateInterval $interval Length of time to integrate into the resulting key
      */
-    public static function CreateKey(string $id, DateTimeInterface $date, DateInterval $interval): string {
+    public static function CreateKey(string $id, DateTimeInterface $date, DateInterval $interval, string $format = 'Y-m-d H'): string {
+        $format = str_contains($format, 'i') || str_contains($format, 's') ? 'Y-m-d H' : $format;
         // This should be unique across all data sources
         // Stop the date at hour so that caching occurs on the hour boundary.
         // The interval uses the full interval value so that different time intervals result in different cache keys.
-        $id .= $date->format('Y-m-d H') . $interval->format('%Y%M%D%H%I%S');
-        return self::VERSION . "_" . hash('sha256', $id);
+        $id .= $date->format($format) . '_' . $interval->format('%Y%M%D%H%I%S');
+        return self::VERSION . "_" . self::StripInvalidChars($id);
+    }
+
+    /**
+     * Strip invalid chars for cache keys.
+     */
+    private static function StripInvalidChars($id) {
+        $invalid_chars = ['{', '}', '(', ')', '/', '\\', '@', ':', '"'];
+        return str_replace($invalid_chars, "", $id);
     }
 
     /**
