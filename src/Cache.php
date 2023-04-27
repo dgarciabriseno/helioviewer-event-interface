@@ -109,4 +109,10 @@ class Cache {
         $redis->connect(HV_REDIS_HOST, HV_REDIS_PORT);
         $redis->flushAll();
     }
+
+    public static function ClearKey(string $key): void {
+        $redis = new Redis();
+        $redis->connect(HV_REDIS_HOST, HV_REDIS_PORT);
+        $redis->del($key);
+    }
 }
