@@ -27,7 +27,7 @@ class Cache {
         $one_week_ago->sub(new DateInterval('P1W'));
         // For dates up to 1 week old, refresh the cache daily since new information may be added.
         if ($date > $one_week_ago) {
-            return new DateInterval("P1D");
+            return new DateInterval("PT15M");
         } else {
             // For older dates, set it to stay in the cache for up to 2 weeks
             return new DateInterval("P2W");
