@@ -13,11 +13,19 @@ use Symfony\Contracts\Cache\ItemInterface;
 class Cache {
     const VERSION = "cache-2.0";
     private static ?RedisAdapter $CacheInstance = null;
+
+    private static function GetRedisDb(): int {
+        if (defined('HV_REDIS_DB')) {
+            return HV_REDIS_DB;
+        } else {
+            return 10;
+        }
+    }
     private static function GetCacheInstance(): RedisAdapter {
         if (is_null(self::$CacheInstance)) {
             $redis = new Redis();
             $redis->connect(HV_REDIS_HOST, HV_REDIS_PORT);
-            $redis->select(HV_REDIS_DB ?? 10);
+            $redis->select(self::GetRedisDb());
             self::$CacheInstance = new RedisAdapter($redis);
         }
         return self::$CacheInstance;
@@ -116,14 +124,14 @@ class Cache {
      */
     public static function Clear(): void {
         $redis = new Redis();
-        $redis->select(HV_REDIS_DB ?? 10);
+        $redis->select(self::GetRedisDb());
         $redis->connect(HV_REDIS_HOST, HV_REDIS_PORT);
         $redis->flushAll();
     }
 
     public static function ClearKey(string $key): void {
         $redis = new Redis();
-        $redis->select(HV_REDIS_DB ?? 10);
+        $redis->select(self::GetRedisDb());
         $redis->connect(HV_REDIS_HOST, HV_REDIS_PORT);
         $redis->del($key);
     }
