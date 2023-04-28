@@ -124,15 +124,15 @@ class Cache {
      */
     public static function Clear(): void {
         $redis = new Redis();
-        $redis->select(self::GetRedisDb());
         $redis->connect(HV_REDIS_HOST, HV_REDIS_PORT);
+        $redis->select(self::GetRedisDb());
         $redis->flushAll();
     }
 
     public static function ClearKey(string $key): void {
         $redis = new Redis();
-        $redis->select(self::GetRedisDb());
         $redis->connect(HV_REDIS_HOST, HV_REDIS_PORT);
+        $redis->select(self::GetRedisDb());
         $redis->del($key);
     }
 }
