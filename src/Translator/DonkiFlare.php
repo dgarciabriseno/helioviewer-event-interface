@@ -100,7 +100,8 @@ class Flare {
                     'end' => $this->end(),
                     'peak' => $this->peak()->format('Y-m-d H:i:s'),
                     'class' => $this->flare['classType'],
-                    'Active Region' => $this->flare['activeRegionNum']
+                    'Active Region' => $this->flare['activeRegionNum'],
+                    'link' => $this->flare['link']
                 ]
             ]
         ];
