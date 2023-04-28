@@ -119,8 +119,11 @@ class DonkiCme {
         $base = [['name' => 'CME', 'content' => $this->cme_view()]];
         // Build a tab for each analysis
         $analyses = $this->get('cmeAnalyses') ?? [];
-        foreach ($analyses as $index => $analysis) {
+        $tabgroup = 0;
+        foreach ($analyses as  $index => $analysis) {
+            $tabgroup += 1;
             array_push($base, [
+                'tabgroup' => $tabgroup,
                 'name' => "Analysis " . $index + 1,
                 'content' => $this->analysis_view($analysis)
             ]);
@@ -128,6 +131,7 @@ class DonkiCme {
             $models = $analysis['enlilList'] ?? [];
             foreach ($models as $index => $model) {
                 array_push($base, [
+                    'tabgroup' => $tabgroup,
                     'name' => "Model " . $index + 1,
                     'content' => $this->model_view($model)
                 ]);
