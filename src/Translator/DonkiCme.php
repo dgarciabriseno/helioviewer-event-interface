@@ -144,7 +144,8 @@ class DonkiCme {
      * Creates the multiline text label used to describe this record.
      */
     public function label() {
-        $defaultLabel = $this->data['startTime'];
+        $date = new DateTimeImmutable($this->data['startTime']);
+        $defaultLabel = $date->format('Y-m-d H:i:s');
         $modeled = $this->hasModelRun() ? "\nModeled" : "";
         // Get the CME Analyses
         $analysis = $this->mostAccurateAnalysis();
