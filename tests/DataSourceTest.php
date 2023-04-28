@@ -17,7 +17,7 @@ final class DataSourceTest extends TestCase
     public function testAsyncQuery(): void
     {
         // Test via the DONKI CME data source
-        $datasource = new DataSource("DONKI", "CME", "CE", "https://kauai.ccmc.gsfc.nasa.gov/DONKI/WS/get/CME", "startDate", "endDate", "Y-m-d", false, "NopTranslator");
+        $datasource = new DataSource("DONKI", "CME", "CE", "https://kauai.ccmc.gsfc.nasa.gov/DONKI/WS/get/CME", "startDate", "endDate", "Y-m-d", "NopTranslator");
         $datasource->beginQuery($this->START_DATE, $this->LENGTH);
         $data = $datasource->getResult();
         // Normally the translator returns helioviewer groups, but in this case since we're using the NopTranslator it just returns the data as-is.
@@ -27,7 +27,7 @@ final class DataSourceTest extends TestCase
 
     public function testDonkiCme(): void
     {
-        $datasource = new DataSource("Donki", "CME", "CE", "https://kauai.ccmc.gsfc.nasa.gov/DONKI/WS/get/CME", "startDate", "endDate", "Y-m-d", false, "DonkiCme");
+        $datasource = new DataSource("Donki", "CME", "CE", "https://kauai.ccmc.gsfc.nasa.gov/DONKI/WS/get/CME", "startDate", "endDate", "Y-m-d", "DonkiCme");
         $datasource->beginQuery($this->START_DATE, $this->LENGTH);
         $data = $datasource->getResult();
         // Here it runs through the DonkiCme translator, so it should actually be in the correct event format.
@@ -39,7 +39,7 @@ final class DataSourceTest extends TestCase
         $start = new DateTimeImmutable("2019-09-05T18:20:28Z");
         $end = new DateInterval("P0D");
 
-        $datasource = new DataSource("Donki", "CME", "CE", "https://kauai.ccmc.gsfc.nasa.gov/DONKI/WS/get/CME", "startDate", "endDate", "Y-m-d", false, "DonkiCme");
+        $datasource = new DataSource("Donki", "CME", "CE", "https://kauai.ccmc.gsfc.nasa.gov/DONKI/WS/get/CME", "startDate", "endDate", "Y-m-d", "DonkiCme");
         $datasource->beginQuery($start, $end);
         $group = $datasource->getResult();
         $this->assertCount(0, $group['groups']);
@@ -49,7 +49,7 @@ final class DataSourceTest extends TestCase
         $start = new DateTimeImmutable("2023-04-05T20:20:00Z");
         $length = new DateInterval("P1D");
 
-        $datasource = new DataSource("Donki", "CME", "CE", "https://kauai.ccmc.gsfc.nasa.gov/DONKI/WS/get/CME", "startDate", "endDate", "Y-m-d", false, "DonkiCme");
+        $datasource = new DataSource("Donki", "CME", "CE", "https://kauai.ccmc.gsfc.nasa.gov/DONKI/WS/get/CME", "startDate", "endDate", "Y-m-d", "DonkiCme");
         $datasource->beginQuery($start, $length);
         $group = $datasource->getResult();
         // Now assert this result has been cached
@@ -60,7 +60,7 @@ final class DataSourceTest extends TestCase
     }
 
     public function testDateRounding(): void {
-        $datasource = new DataSource("Donki", "CME", "CE", "https://kauai.ccmc.gsfc.nasa.gov/DONKI/WS/get/CME", "startDate", "endDate", "Y-m-d", false, "DonkiCme");
+        $datasource = new DataSource("Donki", "CME", "CE", "https://kauai.ccmc.gsfc.nasa.gov/DONKI/WS/get/CME", "startDate", "endDate", "Y-m-d", "DonkiCme");
         $roundDownStart = new DateTimeImmutable("2021-12-09T23:29:59Z");
         $length = new DateInterval("P1D");
         $datasource->beginQuery($roundDownStart, $length);

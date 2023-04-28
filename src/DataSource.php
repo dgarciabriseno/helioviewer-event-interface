@@ -24,7 +24,6 @@ class DataSource {
     protected string $startName;
     protected string $endName;
     protected string $dateFormat;
-    protected bool   $reverse;
     protected string $translator;
     protected ?array $queryParameters;
     protected mixed  $extra;
@@ -58,12 +57,11 @@ class DataSource {
      * @param string $startName The query string parameter name for the start date.
      * @param string $endName The query string parameter name for the end date.
      * @param string $dateFormat The format to use for the dates.
-     * @param bool   $reverse Whether this data source should query backwards in time instead of forwards in time.
      * @param string $translator The name of the translator class to use for this data source.
      * @param ?array $queryParameters Constant parameters that will pass through to the http request
      * @param mixed  $extra Extra data to pass through to the translator
      */
-    public function __construct(string $source, string $name, string $pin, string $uri, string $startName, string $endName, string $dateFormat, bool $reverse, string $translator, ?array $queryParameters = null, mixed $extra = null) {
+    public function __construct(string $source, string $name, string $pin, string $uri, string $startName, string $endName, string $dateFormat, string $translator, ?array $queryParameters = null, mixed $extra = null) {
         $this->source = $source;
         $this->name = $name;
         $this->pin = $pin;
@@ -71,7 +69,6 @@ class DataSource {
         $this->startName = $startName;
         $this->endName = $endName;
         $this->dateFormat = $dateFormat;
-        $this->reverse = $reverse;
         $this->translator = $translator;
         $this->queryParameters = $queryParameters;
         $this->extra = $extra;
@@ -106,15 +103,10 @@ class DataSource {
      */
     private function sendAsyncQuery(DateTimeInterface $start, DateInterval $length, ?callable $postprocessor = null) {
         // Convert input dates to strings
-        if ($this->reverse) {
-            $endString = $start->format($this->dateFormat);
-            $startDate = DateTimeImmutable::createFromInterface($start);
-            $startString = $startDate->sub($length)->format($this->dateFormat);
-        } else {
-            $startString = $start->format($this->dateFormat);
-            $startDate = DateTimeImmutable::createFromInterface($start);
-            $endString = $startDate->add($length)->format($this->dateFormat);
-        }
+        $endString = $start->format($this->dateFormat);
+        $startDate = DateTimeImmutable::createFromInterface($start);
+        $startString = $startDate->sub($length)->format($this->dateFormat);
+
         // Perform HTTP request to the source url
         $client = self::GetClient();
         // Define the request with the date range as query parameters
