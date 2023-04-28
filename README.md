@@ -29,66 +29,55 @@ The goal for this project is to facilitate in translating these datasets into He
 Special note for #3, coordinates must be specified either in Helioprojective Coordinates or Solar Latitude and Longitude.
 
 # Example
-As an example, this is how flare predictions are integrated via this Event Interface
+As an example, this is how Flares from DONKI are integrated via this Event Interface.
+These flares don't have too much data to parse, so they make an ideal example.
 
 1. In `src/Sources.php`, we have added:
 ```php
-new DataSource("CCMC", "Flare Scorebard", "FP", "https://iswa.gsfc.nasa.gov/IswaSystemWebApp/flarescoreboard/hapi/data", "time.min", "time.max", "Y-m-d\TH:i:s", true, "FlarePrediction", ["id" => "SIDC_Operator_REGIONS", "format" => "json", "include" => "header"], "SIDC Operator"),
+new DataSource("CCMC", "DONKI", "F1", "https://kauai.ccmc.gsfc.nasa.gov/DONKI/WS/get/FLR", "startDate", "endDate", "Y-m-d", "DonkiFlare")
 ```
 
-The parameters describe the source, label for the data, pin to use on Helioviewer, and other information required to make the HTTP request.
+The parameters describe the source, label for the data, pin to use on Helioviewer, API URL, the API's date parameters, the format to send the date to the API, and the Translator to use.
 
-2. We have also created `src/Translator/FlarePrediction.php`. This file defines a function named `Translate` which will accept the data from the API request, and parse it into the Helioviewer event format.
+2. We define the translator `src/Translator/DonkiFlare.php`. This file defines a function named `Translate` which will accept the data from the API request, and parse each record into a `HelioviewerEvent`.
 ```php
-function Translate(array $data, string $method, ?callable $postProcessor): array {
+function Translate(array $flares, mixed $extra, ?callable $postProcessor): array {
     $groups = [
         [
-            'name' => $method,
-            'contact' => "",
-            'url' => "https://ccmc.gsfc.nasa.gov/scoreboards/flare/",
+            'name' => 'Solar Flares',
+            'contact' => '',
+            'url' => 'https://kauai.ccmc.gsfc.nasa.gov/DONKI/',
             'data' => []
         ]
     ];
-    if (count($data['data']) == 0) {
-        return $groups;
-    }
-
-    $parameters = $data['parameters'];
-    $coord = new Hgs2Hpc();
-    // Preprocess to only grab the latest predictions
-    $result = &$groups[0]['data'];
-    foreach ($records as $prediction) {
+    $data = &$groups[0]['data'];
+    $hgs2hpc = new Hgs2Hpc();
+    foreach ($flares as $flare) {
+        $flare = new Flare($flare);
         $event = new HelioviewerEvent();
-        $event->id = hash('sha256', json_encode($prediction));
-        $event->label = CreateLabel($prediction, $method);
-        $event->version = "";
-        $event->type = "FP";
-        $event->start = $prediction['start_window'];
-        $event->end = $prediction['end_window'];
-        $event->source = $prediction->jsonSerialize();
-        $event->views = [
-            ['name' => 'Flare Prediction',
-            'content' => $event->source]
-        ];
-        $lat = GetLatitude($prediction);
-        $long = GetLongitude($prediction);
-        $time = GetTime($prediction);
-        // If there's no positional information, then skip this entry.
-        if (is_null($lat) || is_null($long) || is_null($time)) {
-            continue;
-        }
-        $hpc = $coord->convert(GetLatitude($prediction), GetLongitude($prediction), GetTime($prediction));
-        $event->hpc_x = $hpc['x'];
-        $event->hpc_y = $hpc['y'];
+        $event->id = $flare->id();
+        $event->label = $flare->label();
+        $event->version = '';
+        $event->type = 'FL';
+        $event->start = $flare->start();
+        $event->end = $flare->end();
+        $event->source = $flare->flare;
+        $event->views = $flare->views();
+        list($event->hpc_x, $event->hpc_y) = $flare->hpc($hgs2hpc);
+        $event->link = $flare->link();
         if ($postProcessor) {
             $event = $postProcessor($event);
         }
-        array_push($result, (array) $event);
+        array_push($data, (array) $event);
     }
     return $groups;
 }
 ```
+In this example, we iterate over each flare returned from the API, and pass that data to a `Flare` class (left out of for brevity).
 
+This flare class defines some functions which parses the source data to return the fields that we'd like to put in the `HelioviewerEvent`.
+
+Once all the records are parsed, we return them wrapped with some Helioviewer Event Format metadata.
 
 ### Notes
 Looking at `src/Sources.php` is very straightforward on adding new sources. Define the URI, query string date parameters, and the name of the translator file.
@@ -98,7 +87,21 @@ Looking at `src/Sources.php` is very straightforward on adding new sources. Defi
 - The `Translate` function accepts an array (raw json returned by the API) and returns an array in the form of the Helioviewer Event Format.
 - You may include other functions in the file as needed to implement your translator. They are namespaced in your translator's unique namespace so there are no conflicts.
 
-### Configuration
+### Utils
+There are several classes for helping with parsing data. For example, some data sources return data that already has nice key-value pairs, but they use camel case. For viewing on Helioviewer we want human readable title case with spaces. `Camel2Title` can take care of that.
+
+Data from DONKI often uses the format "N10E33" for locations on the sun. That's handled by `LocationParser`.
+
+If the data is from a HAPI server, `HapiRecord` will greatly help with processing the data, it lets you access the data using the parameter names instead of numeric indices.
+
+When writing your own translator, review the features available in Util to see if any of them can help you parse your data source.
+Feel free to contribute your own helpers as well.
+
+### Configuration & Dependencies
+- Redis
 Caching is implemented via Redis.
-The Redis server is selected via the php constants `HV_REDIS_HOST` and `HV_REDIS_PORT`.
-These should be defined by the application including this package.
+The Redis server is selected via the php constants `HV_REDIS_HOST` and `HV_REDIS_PORT` and `HV_REDIS_DB`.
+If `HV_REDIS_DB` is not defined, this will default to using index 10 in Redis.
+These must be defined by the application including this package.
+
+- Minimum PHP version 8.0
