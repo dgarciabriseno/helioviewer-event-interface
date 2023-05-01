@@ -4,7 +4,7 @@ namespace HelioviewerEventInterface\Util;
 
 use \DateTime;
 use \DateTimeInterface;
-use \Exception;
+use \Throwable;
 
 /**
  * Provides date formatting functions for consistent date handling throughout the API
@@ -16,7 +16,7 @@ class Date {
      * @param string $default Default message to use if Date can't be parsed as a date.
      * @return string Date
      */
-    public static function FormatString(?string $date, string $default): string {
+    public static function FormatString(?string $date, string $default = 'N/A'): string {
         $date = self::ParseDateString($date);
         return self::FormatDate($date, $default);
     }
@@ -27,7 +27,7 @@ class Date {
      * @param string $default Default message to use if Date can't be parsed as a date.
      * @return string Date
      */
-    public static function FormatDate(?DateTimeInterface $date, string $default): string {
+    public static function FormatDate(?DateTimeInterface $date, string $default = 'N/A'): string {
         if (isset($date)) {
             return $date->format('Y-m-d H:i:s');
         } else {
@@ -38,7 +38,7 @@ class Date {
     private static function ParseDateString(?string $date): ?DateTime {
         try {
             return new DateTime($date);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             return null;
         }
     }

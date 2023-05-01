@@ -8,6 +8,7 @@ use HelioviewerEventInterface\Coordinator\Hgs2Hpc;
 use HelioviewerEventInterface\Types\EventLink;
 use HelioviewerEventInterface\Types\HelioviewerEvent;
 use HelioviewerEventInterface\Util\LocationParser;
+use HelioviewerEventInterface\Util\Date;
 
 class IgnoreFlare extends Exception {}
 
@@ -54,7 +55,7 @@ class Flare {
     }
 
     public function label(): string {
-        return $this->peak()->format('Y-m-d H:i:s') . "\nDONKI";
+        return Date::FormatDate($this->peak()) . "\nDONKI";
     }
 
     public function hpc(Hgs2Hpc $hgs2hpc): array {
@@ -77,13 +78,11 @@ class Flare {
     }
 
     public function start(): string {
-        $date = new DateTime($this->flare['beginTime']);
-        return $date->format('Y-m-d H:i:s');
+        return Date::FormatString($this->flare['beginTime']);
     }
 
     public function end(): string {
-        $date = new DateTime($this->flare['endTime']);
-        return $date->format('Y-m-d H:i:s');
+        return Date::FormatString($this->flare['endTime']);
     }
 
     public function peak(): DateTime {
