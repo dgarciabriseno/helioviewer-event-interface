@@ -233,6 +233,11 @@ class DonkiCme {
                 $content[$impact['location'] . " Impact"] = $impact['arrivalTime'];
                 $content[$impact['location'] . " Glancing Blow"] = $impact['isGlancingBlow'];
             }
+            // Add gifs
+            $gifs = GetGifsFromDonkiWebPage($content['link']);
+            foreach ($gifs as $gif) {
+                $content[$gif] = $gif;
+            }
         }
         return $content;
     }
@@ -301,5 +306,18 @@ class DonkiCme {
             }
         }
         return $text;
+    }
+}
+
+/**
+ * Queries the given DONKI Model URL and returns all gif urls found on the page.
+ */
+function GetGifsFromDonkiWebPage(string $url): array {
+    $page = file_get_contents($url);
+    preg_match_all('/\bhttps?:\/\/\S+?\.gif\b/i', $page, $gifs);
+    if (count($gifs) > 0) {
+        return array_unique($gifs[0]);
+    } else {
+        return [];
     }
 }
