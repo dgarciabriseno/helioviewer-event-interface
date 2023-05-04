@@ -6,7 +6,7 @@
     "license": "MPL-2.0",
     "scripts": {
         "test-all": "vendor/bin/phpunit --bootstrap tests/bootstrap.php --fail-on-warning tests",
-        "test": "vendor/bin/phpunit --bootstrap tests/bootstrap.php --fail-on-warning tests --filter",
+        "test": "vendor/bin/phpunit --bootstrap tests/bootstrap.php --fail-on-warning tests --filter"
     },
     "autoload": {
         "psr-4": {"HelioviewerEventInterface\\": "src/"}
