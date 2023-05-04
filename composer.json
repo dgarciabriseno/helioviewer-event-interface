@@ -5,8 +5,8 @@
     "bin": ["bin/hgs2hpc.py", "bin/start_hgs2hpc", "bin/clear_cache.php"],
     "license": "MPL-2.0",
     "scripts": {
-        "test": "vendor/bin/phpunit --bootstrap tests/bootstrap.php --fail-on-warning tests",
-        "localtest": "vendor/bin/phpunit --bootstrap tests/bootstrap.php --stop-on-failure --fail-on-warning tests"
+        "test-all": "vendor/bin/phpunit --bootstrap tests/bootstrap.php --fail-on-warning tests",
+        "test": "vendor/bin/phpunit --bootstrap tests/bootstrap.php --fail-on-warning tests --filter"
     },
     "autoload": {
         "psr-4": {"HelioviewerEventInterface\\": "src/"}
