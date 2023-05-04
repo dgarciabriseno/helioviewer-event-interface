@@ -234,9 +234,9 @@ class DonkiCme {
                 $content[$impact['location'] . " Glancing Blow"] = $impact['isGlancingBlow'];
             }
             // Add gifs
-            $gifs = GetGifsFromDonkiWebPage($content['link']);
+            $gifs = GetGifsFromDonkiWebPage($content['Link']);
             foreach ($gifs as $gif) {
-                $content[$gif] = $gif;
+                $content[basename($gif)] = $gif;
             }
         }
         return $content;
