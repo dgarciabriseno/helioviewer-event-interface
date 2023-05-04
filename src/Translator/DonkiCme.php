@@ -313,7 +313,9 @@ class DonkiCme {
  * Queries the given DONKI Model URL and returns all gif urls found on the page.
  */
 function GetGifsFromDonkiWebPage(string $url): array {
-    $page = file_get_contents($url);
+    $client = new \GuzzleHttp\Client([]);
+    $response = $client->get($url);
+    $page = $response->getBody()->getContents();
     preg_match_all('/\bhttps?:\/\/\S+?\.gif\b/i', $page, $gifs);
     if (count($gifs) > 0) {
         return array_unique($gifs[0]);
