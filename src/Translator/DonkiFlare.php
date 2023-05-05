@@ -55,7 +55,20 @@ class Flare {
     }
 
     public function label(): string {
-        return Date::FormatDate($this->peak()) . "\nDONKI";
+        return Date::FormatDate($this->peak()) . "\n" . $this->class() . "\n" . $this->region();
+    }
+
+    public function class(): string {
+        return $this->flare['classType'] ?? '';
+    }
+
+    public function region(): string {
+        $region = $this->flare['activeRegionNum'] ?? null;
+        if ($region) {
+            return "AR $region";
+        } else {
+            return '';
+        }
     }
 
     public function hpc(Hgs2Hpc $hgs2hpc): array {
