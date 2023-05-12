@@ -25,4 +25,18 @@ class Subarray {
         }
         return $sub;
     }
+
+    /**
+     * Returns a new consisting of the given key list, with their names mapped to new new key names.
+     * Ex: Map(['a' => 1, 'b' => 2, 'c' => 3], ['a' => 'd', 'b' => e])
+     *     Result: ['d' => 1, 'e' => 2]
+     * This is useful if some data has all the data you want, but you want to select a subset of keys and assign your own names to them.
+     */
+    public static function Map(array $data, array $mapping) {
+        $result = [];
+        foreach ($mapping as $key => $newKey) {
+            $result[$newKey] = $data[$key];
+        }
+        return $result;
+    }
 }

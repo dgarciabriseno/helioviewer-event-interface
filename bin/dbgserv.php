@@ -4,6 +4,10 @@ include_once __DIR__."/../vendor/autoload.php";
 include_once __DIR__."/../tests/bootstrap.php";
 
 use HelioviewerEventInterface\Events;
+use HelioviewerEventInterface\Cache;
+// Since this is a debug server, don't bother caching anything.
+// This way caching doesn't get in the way of testing changes.
+Cache::Clear();
 
 $sources = $_GET['sources'] ?? null;
 $start = $_GET['start'] ?? '2023-04-01';

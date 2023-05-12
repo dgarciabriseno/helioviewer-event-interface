@@ -23,6 +23,9 @@ class Sources {
             new DataSource("CCMC", "Solar Flare Predictions", "FP", "https://iswa.gsfc.nasa.gov/IswaSystemWebApp/flarescoreboard/hapi/data", "time.min", "time.max", "Y-m-d\TH:i:s", "FlarePrediction", ["id" => "MAG4_SHARP_REGIONS", "format" => "json", "include" => "header"], "MAG4 Sharp"),
             new DataSource("CCMC", "Solar Flare Predictions", "FP", "https://iswa.gsfc.nasa.gov/IswaSystemWebApp/flarescoreboard/hapi/data", "time.min", "time.max", "Y-m-d\TH:i:s", "FlarePrediction", ["id" => "MAG4_SHARP_HMI_REGIONS", "format" => "json", "include" => "header"], "MAG4 Sharp HMI"),
             new DataSource("CCMC", "Solar Flare Predictions", "FP", "https://iswa.gsfc.nasa.gov/IswaSystemWebApp/flarescoreboard/hapi/data", "time.min", "time.max", "Y-m-d\TH:i:s", "FlarePrediction", ["id" => "AEffort_REGIONS", "format" => "json", "include" => "header"], "AEffort"),
+
+            // Notifications
+            new DataSource("SWN", "Space Weather Notifications", "NP", "https://kauai.ccmc.gsfc.nasa.gov/DONKI/WS/get/notifications", "startDate", "endDate", "Y-m-d", "SpaceWeatherNotification"),
         ];
     }
 
