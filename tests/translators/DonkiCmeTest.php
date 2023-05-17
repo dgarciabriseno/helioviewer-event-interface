@@ -23,6 +23,7 @@ final class DonkiCmeTest extends TestCase
         $this->assertCount(16, $gifs);
         foreach ($gifs as $gif) {
             $this->assertStringEndsWith(".gif", $gif);
+            $this->assertStringStartsWith('https:', $gif);
         }
     }
 }

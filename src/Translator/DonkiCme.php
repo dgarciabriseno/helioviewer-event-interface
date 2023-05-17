@@ -318,7 +318,13 @@ function GetGifsFromDonkiWebPage(string $url): array {
     $page = $response->getBody()->getContents();
     preg_match_all('/\bhttps?:\/\/\S+?\.gif\b/i', $page, $gifs);
     if (count($gifs) > 0) {
-        return array_unique($gifs[0]);
+        $links = array_unique($gifs[0]);
+        // Update any 'http' links to 'https'
+        $result = [];
+        foreach ($links as $link) {
+            array_push($result, str_replace('http:', 'https:', $link));
+        }
+        return $result;
     } else {
         return [];
     }
