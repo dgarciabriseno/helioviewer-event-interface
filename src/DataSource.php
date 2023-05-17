@@ -101,11 +101,12 @@ class DataSource {
      * @param callable $postprocessor Executable function to call on each Helioviewer Event processed during the query
      * @return PromiseInterface
      */
-    private function sendAsyncQuery(DateTimeInterface $start, DateInterval $length, ?callable $postprocessor = null) {
+    private function sendAsyncQuery(DateTimeInterface $endDate, DateInterval $length, ?callable $postprocessor = null) {
         // Convert input dates to strings
-        $endString = $start->format($this->dateFormat);
-        $startDate = DateTimeImmutable::createFromInterface($start);
-        $startString = $startDate->sub($length)->format($this->dateFormat);
+        $endString = $endDate->format($this->dateFormat);
+        $startDate = DateTime::createFromInterface($endDate);
+        $startDate->sub($length);
+        $startString = $startDate->format($this->dateFormat);
 
         // Perform HTTP request to the source url
         $client = self::GetClient();
@@ -117,13 +118,13 @@ class DataSource {
         $extra = $this->extra;
         $this->request = $promise->then(
             // Decode the json result on a successful request
-            function (ResponseInterface $response) use ($postprocessor, $extra) {
+            function (ResponseInterface $response) use ($postprocessor, $extra, $endDate, $startDate) {
                 $data = json_decode($response->getBody()->getContents(), true);
                 if (isset($data)) {
                     // Load the requested translator and execute it
                     include_once __DIR__ . "/Translator/" . $this->translator . ".php";
                     // Ah yes, indulge in string execution.
-                    return "HelioviewerEventInterface\\$this->translator\\Translate"($data, $extra, $postprocessor);
+                    return "HelioviewerEventInterface\\$this->translator\\Translate"($data, $extra, $postprocessor, $startDate, $endDate);
                 } else {
                     // If data is null, then there's no data for the query, return an empty list.
                     return [];
