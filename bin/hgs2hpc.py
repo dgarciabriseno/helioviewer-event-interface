@@ -3,7 +3,7 @@ This module provides a server which accepts an observation time, latitude, and l
 """
 
 from astropy.coordinates import SkyCoord
-from sunpy.coordinates import frames
+from sunpy.coordinates import frames, transform_with_sun_center
 from multiprocessing import Process
 import astropy.units as u
 import atexit
@@ -18,9 +18,10 @@ logger.setLevel(logging.INFO)
 # This is really all we want to run. But there's way too much python overhead to call this for each coordinate.
 # Instead, we create a unix socket and then php can connect to it and send the coordinates to be converted.
 def get_hpc(lat, lon, obstime):
-    coord = SkyCoord(lon*u.deg, lat*u.deg, frame=frames.HeliographicStonyhurst, observer="earth", obstime=obstime)
-    hpc = coord.transform_to(frames.Helioprojective)
-    return f"{hpc.Tx.value}, {hpc.Ty.value}"
+    with transform_with_sun_center():
+        coord = SkyCoord(lon*u.deg, lat*u.deg, frame=frames.HeliographicStonyhurst, observer="earth", obstime=obstime)
+        hpc = coord.transform_to(frames.Helioprojective)
+        return f"{hpc.Tx.value}, {hpc.Ty.value}"
 
 def hgs2hpc_thread(connection):
     while True:
