@@ -10,6 +10,7 @@ use HelioviewerEventInterface\Types\HelioviewerEvent;
 use HelioviewerEventInterface\Coordinator\Hgs2Hpc;
 use HelioviewerEventInterface\Types\EventLink;
 use HelioviewerEventInterface\Util\Camel2Title;
+use HelioviewerEventInterface\Util\Math;
 use HelioviewerEventInterface\Util\Subarray;
 
 class IgnoreCme extends Exception {}
@@ -48,6 +49,16 @@ function TranslateCME(array $record, Hgs2Hpc $hgs2hpc, ?callable $postProcessor)
     $end = $start->add(new DateInterval("P1D"));
     $cme = new DonkiCme($record);
     $hpc = $hgs2hpc->convert($cme->latitude, $cme->longitude, $start->format('Y-m-d\TH:i:s\Z'));
+    // Compute the location of the $hpc off-disk
+    // Get vector length from center of sun
+    $vector_length = Math::magnitude($hpc['x'], $hpc['y']);
+    // Normalize the vector to a unit vector pointing in the direction of the CME
+    $hpc['x'] = $hpc['x'] / $vector_length;
+    $hpc['y'] = $hpc['y'] / $vector_length;
+    // Multiply by 3.5*R_sun to get an off-disk position
+    $r_sun = 960; // approximate r_sun in arcseconds
+    $hpc['x'] *= 3.5 * $r_sun;
+    $hpc['y'] *= 3.5 * $r_sun;
 
     $event = new HelioviewerEvent();
     $event->id      = $record['activityID'];
@@ -64,6 +75,9 @@ function TranslateCME(array $record, Hgs2Hpc $hgs2hpc, ?callable $postProcessor)
 
     if (isset($postProcessor)) {
         $event = $postProcessor($event);
+        // Override hpc position to use what was computed here.
+        $event->hv_hpc_x = $hpc['x'];
+        $event->hv_hpc_y = $hpc['y'];
     }
 
     $event->source = $record;
