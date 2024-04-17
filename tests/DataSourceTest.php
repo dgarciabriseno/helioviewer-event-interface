@@ -42,7 +42,9 @@ final class DataSourceTest extends TestCase
         $datasource = new DataSource("Donki", "CME", "CE", "https://kauai.ccmc.gsfc.nasa.gov/DONKI/WS/get/CME", "startDate", "endDate", "Y-m-d", "DonkiCme");
         $datasource->beginQuery($start, $end);
         $group = $datasource->getResult();
-        $this->assertCount(0, $group['groups']);
+        error_log(print_r($group, true));
+        $this->assertCount(1, $group['groups']);
+        $this->assertCount(0, $group['groups'][0]['data']);
     }
 
     public function testCachedQuery(): void {
