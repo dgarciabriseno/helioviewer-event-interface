@@ -5,6 +5,6 @@ namespace HelioviewerEventInterface\NopTranslator;
 /**
  * Test translator that does nothing but return the data as-is
  */
-function Translate(array $data): array {
+function Translate(mixed $data): array {
     return [$data];
 }
