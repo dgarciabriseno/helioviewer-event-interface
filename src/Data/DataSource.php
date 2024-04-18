@@ -4,12 +4,21 @@ namespace HelioviewerEventInterface\Data;
 
 use DateTimeInterface;
 use DateInterval;
+use GuzzleHttp\Client;
 
 /**
  * This abstract class defines an interface for asynchronously querying
  * a data source.
+ *
+ * IF YOU EDIT THIS CLASS, YOU MUST UPDATE docs/datasources.md
  */
 abstract class DataSource {
+    /**
+     * Reference to an HttpClient. Subclasses should retrieve this with
+     * GetClient()
+     */
+    private static ?Client $HttpClient = null;
+
     /**
      * Queries the data source asynchronously for relevant data between the start and end times.
      * Use getResult() to get the response from the last query.
@@ -32,4 +41,11 @@ abstract class DataSource {
      * @return string
      */
     abstract public function GetCacheKey(DateTimeInterface $date, DateInterval $interval): string;
+
+    protected static function GetClient(): Client {
+        if (is_null(self::$HttpClient)) {
+            self::$HttpClient = new Client([]);
+        }
+        return self::$HttpClient;
+    }
 }
