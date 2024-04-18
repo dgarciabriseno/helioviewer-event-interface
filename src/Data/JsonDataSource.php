@@ -30,14 +30,6 @@ class JsonDataSource extends DataSource {
     protected DateInterval $cacheExpiry;
     private ?CacheItemInterface $cache = null;
     private PromiseInterface $request;
-    private static ?Client $HttpClient = null;
-
-    private static function GetClient() {
-        if (is_null(self::$HttpClient)) {
-            self::$HttpClient = new Client([]);
-        }
-        return self::$HttpClient;
-    }
 
     /**
      * Generates a key that is unique to this data source
