@@ -1,22 +1,22 @@
 <?php declare(strict_types=1);
 
-namespace HelioviewerEventInterface;
+namespace HelioviewerEventInterface\Data;
 
 use DateInterval;
-use DateTime;
 use DateTimeImmutable;
-use \DateTimeInterface;
-use \Exception;
+use DateTimeInterface;
+use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Promise\PromiseInterface;
 use Psr\Cache\CacheItemInterface;
 use Psr\Http\Message\ResponseInterface;
+use HelioviewerEventInterface\Cache;
 
 /**
  * A datasource represents an external data source which returns JSON data that we would like to include in Helioviewer.
  * This class defines methods to query data from an external datasource given the appropriate metadata.
  */
-class DataSource {
+class JsonDataSource extends DataSource {
     public string $source;
     public string $name;
     public string $pin;
@@ -121,7 +121,7 @@ class DataSource {
                 $data = json_decode($response->getBody()->getContents(), true);
                 if (isset($data)) {
                     // Load the requested translator and execute it
-                    include_once __DIR__ . "/Translator/" . $this->translator . ".php";
+                    include_once __DIR__ . "/../Translator/" . $this->translator . ".php";
                     // Ah yes, indulge in string execution.
                     return "HelioviewerEventInterface\\$this->translator\\Translate"($data, $extra, $postprocessor);
                 } else {
