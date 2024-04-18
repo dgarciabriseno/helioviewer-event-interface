@@ -6,7 +6,6 @@ use DateInterval;
 use DateTimeImmutable;
 use DateTimeInterface;
 use Exception;
-use GuzzleHttp\Client;
 use GuzzleHttp\Promise\PromiseInterface;
 use Psr\Cache\CacheItemInterface;
 use Psr\Http\Message\ResponseInterface;
