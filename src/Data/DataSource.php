@@ -57,7 +57,7 @@ abstract class DataSource {
         return self::$HttpClient;
     }
 
-    protected function Translate(array $data, mixed $extra = null, ?callable $postprocessor = null): array {
+    protected function Translate(mixed $data, mixed $extra = null, ?callable $postprocessor = null): array {
         if (is_null($this->translator)) {
             throw new Exception("Translator is null, you probably didn't call parent::__construct");
         }
