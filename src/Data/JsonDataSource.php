@@ -24,7 +24,6 @@ class JsonDataSource extends DataSource {
     protected string $startName;
     protected string $endName;
     protected string $dateFormat;
-    protected string $translator;
     protected ?array $queryParameters;
     protected mixed  $extra;
     protected DateInterval $cacheExpiry;
@@ -54,6 +53,7 @@ class JsonDataSource extends DataSource {
      * @param mixed  $extra Extra data to pass through to the translator
      */
     public function __construct(string $source, string $name, string $pin, string $uri, string $startName, string $endName, string $dateFormat, string $translator, ?array $queryParameters = null, mixed $extra = null) {
+        parent::__construct($translator);
         $this->source = $source;
         $this->name = $name;
         $this->pin = $pin;
@@ -61,7 +61,6 @@ class JsonDataSource extends DataSource {
         $this->startName = $startName;
         $this->endName = $endName;
         $this->dateFormat = $dateFormat;
-        $this->translator = $translator;
         $this->queryParameters = $queryParameters;
         $this->extra = $extra;
         $this->cacheExpiry = new DateInterval("P1D");
@@ -112,10 +111,7 @@ class JsonDataSource extends DataSource {
             function (ResponseInterface $response) use ($postprocessor, $extra) {
                 $data = json_decode($response->getBody()->getContents(), true);
                 if (isset($data)) {
-                    // Load the requested translator and execute it
-                    include_once __DIR__ . "/../Translator/" . $this->translator . ".php";
-                    // Ah yes, indulge in string execution.
-                    return "HelioviewerEventInterface\\$this->translator\\Translate"($data, $extra, $postprocessor);
+                    return $this->Translate($data, $extra, $postprocessor);
                 } else {
                     // If data is null, then there's no data for the query, return an empty list.
                     return [];

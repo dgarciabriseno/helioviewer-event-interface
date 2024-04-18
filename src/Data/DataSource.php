@@ -4,6 +4,7 @@ namespace HelioviewerEventInterface\Data;
 
 use DateTimeInterface;
 use DateInterval;
+use Exception;
 use GuzzleHttp\Client;
 
 /**
@@ -18,6 +19,13 @@ abstract class DataSource {
      * GetClient()
      */
     private static ?Client $HttpClient = null;
+
+    /** Translator class to use for processing data */
+    private string $translator;
+
+    public function __construct(string $translator) {
+        $this->translator = $translator;
+    }
 
     /**
      * Queries the data source asynchronously for relevant data between the start and end times.
@@ -47,5 +55,16 @@ abstract class DataSource {
             self::$HttpClient = new Client([]);
         }
         return self::$HttpClient;
+    }
+
+    protected function Translate(array $data, mixed $extra = null, ?callable $postprocessor = null): array {
+        if (is_null($this->translator)) {
+            throw new Exception("Translator is null, you probably didn't call parent::__construct");
+        }
+
+        // Load the requested translator and execute it
+        include_once __DIR__ . "/../Translator/" . $this->translator . ".php";
+        // Ah yes, indulge in string execution.
+        return "HelioviewerEventInterface\\$this->translator\\Translate"($data, $extra, $postprocessor);
     }
 }
