@@ -53,7 +53,7 @@ function Translate(string $csv, mixed $extra, ?callable $postprocessor): array {
     // Setup the data that's going to be returned
     $groups = [
         [
-            'name' => 'RHESSI Flares',
+            'name' => 'Flare',
             'contact' => '',
             'url' => 'https://umbra.nascom.nasa.gov/rhessi/rhessi_extras/flare_images_v2/hsi_flare_image_archive.html',
             'data' => []
@@ -83,7 +83,7 @@ function Translate(string $csv, mixed $extra, ?callable $postprocessor): array {
         }
     }
     return [
-        "name" => "RHESSI Flare List",
+        "name" => "Flare List",
         "pin"  => "FP",
         "groups" => $groups
     ];
