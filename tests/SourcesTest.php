@@ -1,5 +1,6 @@
 <?php declare(strict_types=1);
 
+use HelioviewerEventInterface\Cache;
 use HelioviewerEventInterface\Events;
 use HelioviewerEventInterface\Sources;
 use PHPUnit\Framework\TestCase;
@@ -15,6 +16,11 @@ final class SourcesTest extends TestCase
         $this->assertEquals(0, count($noSources));
     }
 
+    /**
+     * This test verifies that no two data defined data sources have a cache
+     * collision. It also verifies that cache keys are generated on the hour
+     * mark.
+     */
     public function testUniqueCacheKeys(): void {
         $now = new DateTime();
         $interval = new DateInterval("P1D");
@@ -40,13 +46,13 @@ final class SourcesTest extends TestCase
         }
 
         // Verify same keys are computed with a different date within the same hour
-        $newDate = new DateTime($now->format('Y-m-d H:00:00'));
+        $newDate = Cache::RoundDate($now);
         foreach (Sources::All() as $source) {
             $key = $source->GetCacheKey($newDate, $interval);
             $this->assertContains($key, $keys);
         }
 
-        $newDate = new DateTime($now->format('Y-m-d H:59:59'));
+        $newDate = new DateTime($newDate->format('Y-m-d H:59:59'));
         foreach (Sources::All() as $source) {
             $key = $source->GetCacheKey($newDate, $interval);
             $this->assertContains($key, $keys);

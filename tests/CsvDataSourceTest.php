@@ -13,6 +13,7 @@ final class CsvDataSourceTest extends TestCase
     public function getRemoteTestDataSource(string $translator = "NopTranslator"): CsvDataSource {
         return new CsvDataSource(
             "RHESSI",
+            "Flare List",
             "https://hesperia.gsfc.nasa.gov/~kim/rhessi_helioviewer/rhessi_flares_helioviewer.txt",
             $translator,
             ["offset" => 635]
@@ -22,6 +23,7 @@ final class CsvDataSourceTest extends TestCase
     public function getLocalTestDataSource(string $translator = "NopTranslator"): CsvDataSource {
         return new CsvDataSource(
             "RHESSI",
+            "Flare List",
             "file://" . __DIR__ . "/../data/rhessi_flares_helioviewer.txt",
             $translator,
             // Location of the first data row in the csv file
@@ -38,6 +40,7 @@ final class CsvDataSourceTest extends TestCase
     public function testMissingExtraParameter() {
         $ds = new CsvDataSource(
             "RHESSI",
+            "Flare List",
             "file://" . __DIR__ . "/../data/rhessi_flares_helioviewer.txt",
             "RhessiFlare"
         );
@@ -58,9 +61,8 @@ final class CsvDataSourceTest extends TestCase
             new DateInterval("P1D")
         );
         $data = $source->getResult();
-        // Using the nop translator,  full query response is returned
-        $this->assertCount(1, $data);
-        $this->assertCount(4, $data[0]["data"]);
+        $this->assertCount(3, $data);
+        $this->assertCount(4, $data['groups'][0]["data"]);
     }
 
     public function testLocalCsv(): void {
@@ -71,8 +73,8 @@ final class CsvDataSourceTest extends TestCase
         );
         $data = $source->getResult();
         // Expect to find 4 flares for the given time range
-        $this->assertCount(1, $data);
-        $this->assertCount(4, $data[0]["data"]);
+        $this->assertCount(3, $data);
+        $this->assertCount(4, $data['groups'][0]["data"]);
     }
 
     // TODO: Test date boundary conditions (when the requested date is exactly the flare's start/end time)

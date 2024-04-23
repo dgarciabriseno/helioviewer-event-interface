@@ -16,8 +16,6 @@ use HelioviewerEventInterface\Cache;
  * This class defines methods to query data from an external datasource given the appropriate metadata.
  */
 class JsonDataSource extends DataSource {
-    public string $source;
-    public string $name;
     public string $pin;
     protected string $uri;
     protected string $startName;
@@ -52,9 +50,7 @@ class JsonDataSource extends DataSource {
      * @param mixed  $extra Extra data to pass through to the translator
      */
     public function __construct(string $source, string $name, string $pin, string $uri, string $startName, string $endName, string $dateFormat, string $translator, ?array $queryParameters = null, mixed $extra = null) {
-        parent::__construct($translator);
-        $this->source = $source;
-        $this->name = $name;
+        parent::__construct($source, $name, $translator);
         $this->pin = $pin;
         $this->uri = $uri;
         $this->startName = $startName;
