@@ -137,7 +137,14 @@ class RhessiFlare {
 
 
     public function asMappedArray(): array {
-        return $this->data;
+        // clone the data
+        $data = unserialize(serialize($this->data));
+        // Rewrite some fields to be more appropriate for the view
+        $data['start'] = Date::FormatDate($data['start']);
+        $data['end'] = Date::FormatDate($data['end']);
+        $data['peak'] = Date::FormatDate($data['peak']);
+        $data['link'] = $this->url();
+        return $data;
     }
 
     public function url(): string {
