@@ -83,7 +83,7 @@ function Translate(string $csv, mixed $extra, ?callable $postprocessor): array {
         }
     }
     return [
-        "name" => "Flare List",
+        "name" => "Solar Flares",
         "pin"  => "FP",
         "groups" => $groups
     ];
