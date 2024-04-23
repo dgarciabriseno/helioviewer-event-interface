@@ -1,8 +1,11 @@
 # Data Source Writing Guide
 
 This document aims to provide guidance on implementing new data source
-interfaces, not necessarily integrating external sources. See the main
-readme for how to integrate a new API.
+interfaces. The purpose of these interfaces is to define how to query
+different types of data i.e. (CSV, TAP, JSON, SOAP, etc). If you are integrating
+a new data source, you should first try to use one of the existing DataSource
+interfaces. If the protocol you use to get retrieve data isn't supported, then
+you may need to create / request a new interface.
 
 ## Supported Interfaces
 
@@ -88,10 +91,11 @@ if ($this->cache->isHit()) {
 // On cache miss, kick off the http request
 // Get a reference to the Guzzle\HttpClient
 $client = $this->GetClient();
-// Make an asynchronous request
-$request = $client->requestAsync(query parameters);
+// Make an asynchronous request. Store it on instance variable so it can be
+// accessed in getResult
+$promise = $client->requestAsync(query parameters);
 // Define the work to be done when the request is complete
-$request->then(function (ResponseInterface $response) {
+$this->request = $promise->then(function (ResponseInterface $response) {
     $data = custom_response_parser($response);
     return $this->Translate($data);
 });
