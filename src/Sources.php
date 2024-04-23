@@ -1,6 +1,8 @@
 <?php declare(strict_types=1);
 
 namespace HelioviewerEventInterface;
+
+use HelioviewerEventInterface\Data\CsvDataSource;
 use HelioviewerEventInterface\Data\JsonDataSource;
 
 /**
@@ -23,6 +25,7 @@ class Sources {
             new JsonDataSource("CCMC", "Solar Flare Predictions", "FP", "https://iswa.gsfc.nasa.gov/IswaSystemWebApp/flarescoreboard/hapi/data", "time.min", "time.max", "Y-m-d\TH:i:s", "FlarePrediction", ["id" => "MAG4_SHARP_REGIONS", "format" => "json", "include" => "header"], "MAG4 Sharp"),
             new JsonDataSource("CCMC", "Solar Flare Predictions", "FP", "https://iswa.gsfc.nasa.gov/IswaSystemWebApp/flarescoreboard/hapi/data", "time.min", "time.max", "Y-m-d\TH:i:s", "FlarePrediction", ["id" => "MAG4_SHARP_HMI_REGIONS", "format" => "json", "include" => "header"], "MAG4 Sharp HMI"),
             new JsonDataSource("CCMC", "Solar Flare Predictions", "FP", "https://iswa.gsfc.nasa.gov/IswaSystemWebApp/flarescoreboard/hapi/data", "time.min", "time.max", "Y-m-d\TH:i:s", "FlarePrediction", ["id" => "AEffort_REGIONS", "format" => "json", "include" => "header"], "AEffort"),
+            new CsvDataSource ("RHESSI", "file://" . __DIR__ . "/../data/rhessi_flares_helioviewer.txt", "F2", ['offset' => 635]),
         ];
     }
 
