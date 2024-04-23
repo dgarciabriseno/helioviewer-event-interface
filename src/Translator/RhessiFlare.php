@@ -175,7 +175,7 @@ class RhessiFlare {
         $event->type = "FL";
         $event->start = Date::FormatDate($this->data["start"]);
         $event->end = Date::FormatDate($this->data["end"]);
-        $event->source = $this->asMappedArray();
+        $event->source = $this->data;
         $event->views = $this->views();
         $event->hpc_x = floatval($this->data["xloc"]);
         $event->hpc_y = floatval($this->data["yloc"]);
