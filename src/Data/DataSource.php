@@ -2,9 +2,9 @@
 
 namespace HelioviewerEventInterface\Data;
 
-use DateTimeInterface;
-use DateInterval;
-use Exception;
+use \DateTimeInterface;
+use \DateInterval;
+use \Exception;
 use GuzzleHttp\Client;
 
 /**
@@ -14,6 +14,10 @@ use GuzzleHttp\Client;
  * IF YOU EDIT THIS CLASS, YOU MUST UPDATE docs/datasources.md
  */
 abstract class DataSource {
+    /** Name of where the data is coming from */
+    public string $source;
+    /** Name of data product */
+    public string $name;
     /**
      * Reference to an HttpClient. Subclasses should retrieve this with
      * GetClient()
@@ -23,8 +27,10 @@ abstract class DataSource {
     /** Translator class to use for processing data */
     private string $translator;
 
-    public function __construct(string $translator) {
+    public function __construct(string $source, string $name, string $translator) {
         $this->translator = $translator;
+        $this->source = $source;
+        $this->name = $name;
     }
 
     /**

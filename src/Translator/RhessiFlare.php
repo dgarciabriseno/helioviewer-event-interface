@@ -82,7 +82,11 @@ function Translate(string $csv, mixed $extra, ?callable $postprocessor): array {
             break;
         }
     }
-    return $groups;
+    return [
+        "name" => "RHESSI Flare List",
+        "pin"  => "FP",
+        "groups" => $groups
+    ];
 }
 
 /**

@@ -15,9 +15,6 @@ use HelioviewerEventInterface\Data\DataSource;
  * The Csv Data Source implements processing a data source read from a CSV file.
  */
 class CsvDataSource extends DataSource {
-    /** Name of the data source */
-    public string $name;
-
     /**
      * Location of the csv data.
      * This can be remote via https://... or local via file://...
@@ -41,14 +38,14 @@ class CsvDataSource extends DataSource {
 
     /**
      * Construct a csv data source
-     * @param string $name Unique name of the data source
+     * @param string $source Unique name of the data source
+     * @param string $name Subname for this data source
      * @param string $uri Location of data, must start with https:// or file://
      * @param string $translator The name of the translator class to use for this data source.
      */
-    public function __construct(string $name, string $uri, string $translator, array $extra = [])
+    public function __construct(string $source, string $name, string $uri, string $translator, array $extra = [])
     {
-        parent::__construct($translator);
-        $this->name = $name;
+        parent::__construct($source, $name, $translator);
         $this->uri = $uri;
         $this->translator = $translator;
         $this->extra = $extra;
@@ -148,7 +145,6 @@ class CsvDataSource extends DataSource {
      */
     public function GetCacheKey(DateTimeInterface $start, DateInterval $interval): string
     {
-        $roundedDateTime = Cache::RoundDate($start);
-        return Cache::CreateKey($this->name . "_csv", $roundedDateTime, $interval);
+        return Cache::CreateKey($this->name . "_csv", $start, $interval);
     }
 }
