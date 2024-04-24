@@ -84,7 +84,7 @@ function Translate(string $csv, mixed $extra, ?callable $postprocessor): array {
     }
     return [
         "name" => "Solar Flares",
-        "pin"  => "FP",
+        "pin"  => "F2",
         "groups" => $groups
     ];
 }
