@@ -3,9 +3,8 @@
 use HelioviewerEventInterface\Events;
 use PHPUnit\Framework\TestCase;
 
-use function HelioviewerEventInterface\DonkiCme\GetGifsFromDonkiWebPage;
-
-include_once __DIR__ . "/../../src/Translator/DonkiCme.php";
+use function HelioviewerEventInterface\Translator\GetGifsFromDonkiWebPage;
+use HelioviewerEventInterface\Translator\DonkiCme;
 
 final class DonkiCmeTest extends TestCase
 {
@@ -25,6 +24,53 @@ final class DonkiCmeTest extends TestCase
             $this->assertStringEndsWith(".gif", $gif);
             $this->assertStringStartsWith('https:', $gif);
         }
+    }
+
+
+    public function testShortLabelDefaultLabel(): void 
+    {
+        $data["startTime"] = "2024-05-14T10:09Z";
+        $data["sourceLocation"] = "2024-05-14T10:09Z";
+
+        $donkiCme = new DonkiCme($data);
+
+        $this->assertEquals("2024-05-14 10:09:00", $donkiCme->shortLabel());
+    }
+
+    public function testShortLabelWithModeled(): void 
+    {
+        $data["startTime"] = "2024-05-14T10:09Z";
+        $data["sourceLocation"] = "2024-05-14T10:09Z";
+        $data["cmeAnalyses"] = [[
+            'isMostAccurate' => true,
+            'latitude' => -36,
+            'longitude' => 72,
+            'type' => 'foo_type',
+            'halfAngle' => 'foo_angle',
+            'speed' => 'foo_speed',
+            'enlilList' => [[
+            ]],
+        ]]; 
+
+        $donkiCme = new DonkiCme($data);
+        $this->assertEquals("Type: foo_type foo_angle&deg; foo_speed km/s Modeled", $donkiCme->shortLabel());
+    }
+        
+    public function testShortLabelWithoutModeled(): void 
+    {
+        $data["startTime"] = "2024-05-14T10:09Z";
+        $data["sourceLocation"] = "2024-05-14T10:09Z";
+        $data["cmeAnalyses"] = [[
+            'isMostAccurate' => true,
+            'latitude' => -36,
+            'longitude' => 72,
+            'type' => 'foo_type',
+            'halfAngle' => 'foo_angle',
+            'speed' => 'foo_speed',
+        ]]; 
+
+        $donkiCme = new DonkiCme($data);
+        $this->assertEquals("Type: foo_type foo_angle&deg; foo_speed km/s", $donkiCme->shortLabel());
     }
 }
 
