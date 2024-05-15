@@ -65,7 +65,7 @@ final class EventsTest extends TestCase
         // Create a temporary directory which will be used to track execution of parallel code
         $tmpdir = sys_get_temp_dir() . "/phpunit_test";
         if (is_dir($tmpdir)) {
-            exec("rm -r " . $tmpdir);
+            exec("rm -rf " . $tmpdir);
         }
         mkdir($tmpdir);
 
@@ -85,7 +85,6 @@ final class EventsTest extends TestCase
             // See https://stackoverflow.com/questions/26285311/ssl-requests-made-with-curl-fail-after-process-fork
             // So to workaround this, place the following PHP code into a new file and execute it.
             file_put_contents($tmpdir . "/child_process.php", "<?php
-            include_once '".__DIR__."/../vendor/autoload.php';
             include_once '".__DIR__."/bootstrap.php';
             use HelioviewerEventInterface\Events;
             \$date = new DateTime('2023-04-01');
