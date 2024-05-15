@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace HelioviewerEventInterface\DonkiFlare;
+namespace HelioviewerEventInterface\Translator;
 
 use \Exception;
 use \DateTime;
@@ -10,41 +10,7 @@ use HelioviewerEventInterface\Types\HelioviewerEvent;
 use HelioviewerEventInterface\Util\LocationParser;
 use HelioviewerEventInterface\Util\Date;
 
-class IgnoreFlare extends Exception {}
-
-function Translate(array $flares, mixed $extra, ?callable $postProcessor): array {
-    $groups = [
-        [
-            'name' => 'Solar Flares',
-            'contact' => '',
-            'url' => 'https://kauai.ccmc.gsfc.nasa.gov/DONKI/',
-            'data' => []
-        ]
-    ];
-    $data = &$groups[0]['data'];
-    $hgs2hpc = new Hgs2Hpc();
-    foreach ($flares as $flare) {
-        $flare = new Flare($flare);
-        $event = new HelioviewerEvent();
-        $event->id = $flare->id();
-        $event->label = $flare->label();
-        $event->version = '';
-        $event->type = 'FL';
-        $event->start = $flare->start();
-        $event->end = $flare->end();
-        $event->source = $flare->flare;
-        $event->views = $flare->views();
-        list($event->hpc_x, $event->hpc_y) = $flare->hpc($hgs2hpc);
-        $event->link = $flare->link();
-        if ($postProcessor) {
-            $event = $postProcessor($event);
-        }
-        array_push($data, (array) $event);
-    }
-    return $groups;
-}
-
-class Flare {
+class DonkiFlare {
     public array $flare;
     public function __construct(array $flare) {
         $this->flare = $flare;
@@ -52,10 +18,6 @@ class Flare {
 
     public function id(): string {
         return $this->flare['flrID'];
-    }
-
-    public function label(): string {
-        return Date::FormatDate($this->peak()) . "\n" . $this->class() . "\n" . $this->region();
     }
 
     public function class(): string {
@@ -102,6 +64,42 @@ class Flare {
         return new DateTime($this->flare['peakTime']);
     }
 
+    /**
+     * Creates the label used to describe this record.
+     */
+    public function label(): string {
+        $label = Date::FormatDate($this->peak());
+
+        if($class = $this->class()) {
+            $label = $label ."\n".$class;
+        }
+
+        if($region = $this->region()) {
+            $label = $label ."\n".$region;
+        }
+
+        return $label;
+    }
+
+    /**
+     * Creates the short label used to describe this record.
+     */
+    public function shortLabel() {
+
+        $label = Date::FormatDate($this->peak());
+
+        if($class = $this->class()) {
+            $label = $label ." ".$class;
+        }
+
+        if($region = $this->region()) {
+            $label = $label ." ".$region;
+        }
+
+        return $label;
+
+    }
+
     public function views(): array {
         return [
             [
@@ -118,4 +116,39 @@ class Flare {
             ]
         ];
     }
+
+
+    public static function Translate(array $flares, mixed $extra, ?callable $postProcessor): array {
+        $groups = [
+            [
+                'name' => 'Solar Flares',
+                'contact' => '',
+                'url' => 'https://kauai.ccmc.gsfc.nasa.gov/DONKI/',
+                'data' => []
+            ]
+        ];
+        $data = &$groups[0]['data'];
+        $hgs2hpc = new Hgs2Hpc();
+        foreach ($flares as $flare) {
+            $flare = new self($flare);
+            $event = new HelioviewerEvent();
+            $event->id = $flare->id();
+            $event->label = $flare->label();
+            $event->short_label   = $flare->shortLabel();
+            $event->version = '';
+            $event->type = 'FL';
+            $event->start = $flare->start();
+            $event->end = $flare->end();
+            $event->source = $flare->flare;
+            $event->views = $flare->views();
+            list($event->hpc_x, $event->hpc_y) = $flare->hpc($hgs2hpc);
+            $event->link = $flare->link();
+            if ($postProcessor) {
+                $event = $postProcessor($event);
+            }
+            array_push($data, (array) $event);
+        }
+        return $groups;
+    }
+
 }
