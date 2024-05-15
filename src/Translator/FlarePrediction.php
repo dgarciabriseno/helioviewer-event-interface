@@ -75,15 +75,9 @@ class FlarePrediction {
  * Creates the label text that shows up on Helioviewer for the flare prediction
  */
 function CreateLabel(HapiRecord $prediction, string $dataset): string {
-    $label = $dataset;
 
-    // Add the flare prediction values to the label
-    foreach (FLARE_CLASSES as $class) {
-        $label = AppendFlarePredictionToLabel($prediction, $class, $label);
-    }
-    $label = LabelNoPrediction($prediction, $label);
+	return $dataset . " " .CreateShortLabel($prediction);
 
-    return $label;
 }
 
 

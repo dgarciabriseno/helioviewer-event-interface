@@ -11,6 +11,7 @@ use HelioviewerEventInterface\Coordinator\Hgs2Hpc;
 use HelioviewerEventInterface\Types\EventLink;
 use HelioviewerEventInterface\Util\Camel2Title;
 use HelioviewerEventInterface\Util\Subarray;
+use HelioviewerEventInterface\Util\Date;
 
 class IgnoreCme extends Exception {}
 
@@ -118,8 +119,7 @@ class DonkiCme {
      * Creates the short label used to describe this record.
      */
     public function shortLabel() {
-        $date = new DateTimeImmutable($this->data['startTime']);
-        $defaultLabel = $date->format('Y-m-d H:i:s');
+        $defaultLabel = Date::FormatString($this->data['startTime']);
         $modeled = $this->hasModelRun() ? " Modeled" : "";
         // Get the CME Analyses
         $analysis = $this->mostAccurateAnalysis();
@@ -134,8 +134,7 @@ class DonkiCme {
      * Creates the multiline text label used to describe this record.
      */
     public function label() {
-        $date = new DateTimeImmutable($this->data['startTime']);
-        $defaultLabel = $date->format('Y-m-d H:i:s');
+        $defaultLabel = Date::FormatString($this->data['startTime']);
         $modeled = $this->hasModelRun() ? "\nModeled" : "";
         // Get the CME Analyses
         $analysis = $this->mostAccurateAnalysis();
