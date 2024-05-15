@@ -1,10 +1,16 @@
 <?php declare(strict_types=1);
 
-namespace HelioviewerEventInterface\NopTranslator;
+namespace HelioviewerEventInterface\Translator;
 
 /**
- * Test translator that does nothing but return the data as-is
+ * A Translator does not translate
  */
-function Translate(mixed $data): array {
-    return [$data];
+class NopTranslator {
+    /**
+     * Test translator that does nothing but return the data as-is
+     */
+    public static function Translate(mixed $data): array {
+        return [$data];
+    }
+
 }

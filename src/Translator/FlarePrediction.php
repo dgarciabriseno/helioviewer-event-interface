@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace HelioviewerEventInterface\FlarePrediction;
+namespace HelioviewerEventInterface\Translator;
 
 use DateTime;
 use HelioviewerEventInterface\Coordinator\Hgs2Hpc;
@@ -9,61 +9,67 @@ use HelioviewerEventInterface\Util\HapiRecord;
 
 const FLARE_CLASSES = ["C", "CPlus", "M", "MPlus", "X"];
 
-function Translate(array $data, string $method, ?callable $postProcessor): array {
-    $groups = [
-        [
-            'name' => $method,
-            'contact' => "",
-            'url' => "https://ccmc.gsfc.nasa.gov/scoreboards/flare/",
-            'data' => []
-        ]
-    ];
-    if (count($data['data']) == 0) {
+class FlarePrediction {
+    
+    public static function Translate(array $data, string $method, ?callable $postProcessor): array {
+        $groups = [
+            [
+                'name' => $method,
+                'contact' => "",
+                'url' => "https://ccmc.gsfc.nasa.gov/scoreboards/flare/",
+                'data' => []
+            ]
+        ];
+        if (count($data['data']) == 0) {
+            return $groups;
+        }
+
+        $parameters = $data['parameters'];
+        $coord = new Hgs2Hpc();
+        // Preprocess to only grab the latest predictions
+        $records = array_map(function ($record) use ($parameters) { return new HapiRecord($record, $parameters, ""); }, $data['data']);
+        $dateStrings = array_column($records, 'start_window');
+        $dateValues = array_map(function ($str) { return new DateTime($str); }, $dateStrings);
+        $latestDate = max(array_values($dateValues));
+        $result = &$groups[0]['data'];
+        foreach ($records as $prediction) {
+            $date = new DateTime($prediction['start_window']);
+            if ($date != $latestDate) {
+                continue;
+            }
+            $event = new HelioviewerEvent();
+            $event->id = hash('sha256', json_encode($prediction));
+            $event->label = CreateLabel($prediction, $method);
+            $event->short_label = CreateShortLabel($prediction);
+            $event->version = "";
+            $event->type = "FP";
+            $event->start = $prediction['start_window'];
+            $event->end = $prediction['end_window'];
+            $event->source = $prediction->jsonSerialize();
+            $event->views = [
+                ['name' => 'Flare Prediction',
+                'content' => $event->source]
+            ];
+            $lat = GetLatitude($prediction);
+            $long = GetLongitude($prediction);
+            $time = GetTime($prediction);
+            // If there's no positional information, then skip this entry.
+            if (is_null($lat) || is_null($long) || is_null($time)) {
+                continue;
+            }
+            $hpc = $coord->convert(GetLatitude($prediction), GetLongitude($prediction), GetTime($prediction));
+            $event->hpc_x = $hpc['x'];
+            $event->hpc_y = $hpc['y'];
+            if ($postProcessor) {
+                $event = $postProcessor($event);
+            }
+            array_push($result, (array) $event);
+        }
         return $groups;
     }
 
-    $parameters = $data['parameters'];
-    $coord = new Hgs2Hpc();
-    // Preprocess to only grab the latest predictions
-    $records = array_map(function ($record) use ($parameters) { return new HapiRecord($record, $parameters, ""); }, $data['data']);
-    $dateStrings = array_column($records, 'start_window');
-    $dateValues = array_map(function ($str) { return new DateTime($str); }, $dateStrings);
-    $latestDate = max(array_values($dateValues));
-    $result = &$groups[0]['data'];
-    foreach ($records as $prediction) {
-        $date = new DateTime($prediction['start_window']);
-        if ($date != $latestDate) {
-            continue;
-        }
-        $event = new HelioviewerEvent();
-        $event->id = hash('sha256', json_encode($prediction));
-        $event->label = CreateLabel($prediction, $method);
-        $event->version = "";
-        $event->type = "FP";
-        $event->start = $prediction['start_window'];
-        $event->end = $prediction['end_window'];
-        $event->source = $prediction->jsonSerialize();
-        $event->views = [
-            ['name' => 'Flare Prediction',
-            'content' => $event->source]
-        ];
-        $lat = GetLatitude($prediction);
-        $long = GetLongitude($prediction);
-        $time = GetTime($prediction);
-        // If there's no positional information, then skip this entry.
-        if (is_null($lat) || is_null($long) || is_null($time)) {
-            continue;
-        }
-        $hpc = $coord->convert(GetLatitude($prediction), GetLongitude($prediction), GetTime($prediction));
-        $event->hpc_x = $hpc['x'];
-        $event->hpc_y = $hpc['y'];
-        if ($postProcessor) {
-            $event = $postProcessor($event);
-        }
-        array_push($result, (array) $event);
-    }
-    return $groups;
 }
+
 
 /**
  * Creates the label text that shows up on Helioviewer for the flare prediction
@@ -80,6 +86,22 @@ function CreateLabel(HapiRecord $prediction, string $dataset): string {
     return $label;
 }
 
+
+/**
+ * Creates the short label text that shows up on Helioviewer for the flare prediction
+ */
+function CreateShortLabel(HapiRecord $prediction): string {
+
+    $label = "";
+
+    // Add the flare prediction values to the label
+    foreach (FLARE_CLASSES as $class) {
+        $label = AppendFlarePredictionToLabel($prediction, $class, $label);
+    }
+    $label = LabelNoPrediction($prediction, $label);
+
+    return $label;
+}
 /**
  * Adds the flare prediction as a newline on the label.
  * @return string the new label with the flare string appended to it or the original label if the flare class isn't in the prediction.

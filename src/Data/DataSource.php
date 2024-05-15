@@ -68,9 +68,7 @@ abstract class DataSource {
             throw new Exception("Translator is null, you probably didn't call parent::__construct");
         }
 
-        // Load the requested translator and execute it
-        include_once __DIR__ . "/../Translator/" . $this->translator . ".php";
         // Ah yes, indulge in string execution.
-        return "HelioviewerEventInterface\\$this->translator\\Translate"($data, $extra, $postprocessor);
+        return "HelioviewerEventInterface\\Translator\\$this->translator::Translate"($data, $extra, $postprocessor);
     }
 }

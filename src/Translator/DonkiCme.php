@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace HelioviewerEventInterface\DonkiCme;
+namespace HelioviewerEventInterface\Translator;
 
 use \DateInterval;
 use \DateTimeImmutable;
@@ -14,34 +14,6 @@ use HelioviewerEventInterface\Util\Subarray;
 
 class IgnoreCme extends Exception {}
 
-function Translate(array $data, mixed $extra, ?callable $postProcessor): array {
-    $groups = [
-        [
-            'name' => "CME",
-            'contact' => 'Space Weather Database of NOtifications, Knowledge, Information (DONKI)',
-            'url' => 'https://kauai.ccmc.gsfc.nasa.gov/DONKI/',
-            'data' => []
-        ]
-    ];
-    // Breaking encapsulation a bit... but creating one overall Hgs2Hpc instance means it will reuse the socket connection for each record.
-    // This should give a slight performance improvement since it doesn't need to create a new connection for each record.
-    $hgs2hpc = new Hgs2Hpc();
-    foreach ($data as $record) {
-        try {
-            $cme = TranslateCME($record, $hgs2hpc, $postProcessor);
-            array_push($groups[0]['data'], $cme);
-        }
-        catch (IgnoreCme) {
-            continue;
-        }
-        catch (Throwable $e) {
-            error_log("Failed to parse the following CME record: " . $e->getMessage());
-            error_log(json_encode($record));
-            continue;
-        }
-    }
-    return array_values($groups);
-}
 
 function TranslateCME(array $record, Hgs2Hpc $hgs2hpc, ?callable $postProcessor): array {
     $start = new DateTimeImmutable($record['startTime']);
@@ -52,6 +24,7 @@ function TranslateCME(array $record, Hgs2Hpc $hgs2hpc, ?callable $postProcessor)
     $event = new HelioviewerEvent();
     $event->id      = $record['activityID'];
     $event->label   = $cme->label();
+    $event->short_label   = $cme->shortLabel();
     $event->version = $record['catalog'];
     $event->type    = 'CE';
     $event->start   = $start->format('Y-m-d H:i:s');
@@ -138,6 +111,23 @@ class DonkiCme {
             }
         }
         return $base;
+    }
+
+
+    /**
+     * Creates the short label used to describe this record.
+     */
+    public function shortLabel() {
+        $date = new DateTimeImmutable($this->data['startTime']);
+        $defaultLabel = $date->format('Y-m-d H:i:s');
+        $modeled = $this->hasModelRun() ? " Modeled" : "";
+        // Get the CME Analyses
+        $analysis = $this->mostAccurateAnalysis();
+        if (isset($analysis)) {
+            return sprintf("Type: %s %s&deg; %s km/s%s", $analysis['type'], $analysis['halfAngle'], $analysis['speed'], $modeled);
+        }
+        // If fields weren't present to create a more accurate label, then just use basic information.
+        return $defaultLabel . $modeled;
     }
 
     /**
@@ -306,6 +296,35 @@ class DonkiCme {
             }
         }
         return $text;
+    }
+
+    public static function Translate(array $data, mixed $extra, ?callable $postProcessor): array {
+        $groups = [
+            [
+                'name' => "CME",
+                'contact' => 'Space Weather Database of NOtifications, Knowledge, Information (DONKI)',
+                'url' => 'https://kauai.ccmc.gsfc.nasa.gov/DONKI/',
+                'data' => []
+            ]
+        ];
+        // Breaking encapsulation a bit... but creating one overall Hgs2Hpc instance means it will reuse the socket connection for each record.
+        // This should give a slight performance improvement since it doesn't need to create a new connection for each record.
+        $hgs2hpc = new Hgs2Hpc();
+        foreach ($data as $record) {
+            try {
+                $cme = TranslateCME($record, $hgs2hpc, $postProcessor);
+                array_push($groups[0]['data'], $cme);
+            }
+            catch (IgnoreCme) {
+                continue;
+            }
+            catch (Throwable $e) {
+                error_log("Failed to parse the following CME record: " . $e->getMessage());
+                error_log(json_encode($record));
+                continue;
+            }
+        }
+        return array_values($groups);
     }
 }
 

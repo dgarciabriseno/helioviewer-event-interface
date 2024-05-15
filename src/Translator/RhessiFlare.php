@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace HelioviewerEventInterface\RhessiFlare;
+namespace HelioviewerEventInterface\Translator;
 
 use \DateInterval;
 use \DateTimeImmutable;
@@ -21,73 +21,6 @@ function string_stream(string $str) {
     return $fp;
 }
 
-/**
- * Parses a subset of the RHESSI Flare List csv into the Helioviewer event format
- * The subset is determined by $extra['start'] (DateTimeInterface) and $extra['length'] (DateInterval)
- *
- * Originally, this was going to parse the entire RHESSI Flare list into Helioviewer Event Format
- * and then filter results later, but the flare list is too large to store in-memory for PHP.
- * The default limit is 128MB, and I'd rather not require Helioviewer hosts to need to modify
- * their memory limits as it just adds more complexity to system management.
- * Instead, this reads the flare CSV and only processes the values which fall in
- * the query range. Data is still cached on the hour, but since this data is static,
- * the cached values do not expire.
- *
- * @param string $csv the contents of the csv flare list
- * @param array $extra Array with the following keys: offset => int, start => DateTimeInterface, length => DateInterval
- */
-function Translate(string $csv, mixed $extra, ?callable $postprocessor): array {
-    // $extra must have certain keys for the RhessiFlare translator
-    // offset - The start of the data within the csv file
-    // start - A DateTime instance representing an endpoint of the query range.
-    // length - A DateInterval instance which represents the desired time range
-    //          when combined with the start time.
-    if (!array_key_exists("offset", $extra) ||
-        !array_key_exists("start", $extra) ||
-        !array_key_exists("length", $extra)) {
-            throw new Exception(
-                "Missing required extra parameters for RhessiFlare Translator.
-                Expected 'offset', 'start', and 'length'. Got " . print_r(array_keys($extra), true)
-            );
-    }
-    // Setup the data that's going to be returned
-    $groups = [
-        [
-            'name' => 'Flare',
-            'contact' => '',
-            'url' => 'https://umbra.nascom.nasa.gov/rhessi/rhessi_extras/flare_images_v2/hsi_flare_image_archive.html',
-            'data' => []
-        ]
-    ];
-    $stream = string_stream($csv);
-    // Move pointer to the first item in the csv.
-    fseek($stream, $extra['offset']);
-    $count = 0;
-    $saved = 0;
-    while ($data = fgetcsv($stream)) {
-        $count += 1;
-        $flare = new RhessiFlare($data);
-        if ($flare->withinRange($extra['start'], $extra['length'])) {
-            $event = $flare->asEvent();
-            if (isset($postprocessor)) {
-                $event = $postprocessor($event);
-            }
-            $saved += 1;
-            array_push($groups[0]['data'], (array) $event);
-        } else if ($flare->isAfterRange($extra['start'], $extra['length'])) {
-            // The flare list is sorted by start time, so as soon as we find
-            // a flare that's after the time range, we can exit since we know
-            // there will be no more flares to process.
-            // Flares before the time range must still be checked.
-            break;
-        }
-    }
-    return [
-        "name" => "Solar Flares",
-        "pin"  => "F2",
-        "groups" => $groups
-    ];
-}
 
 /**
  * Interface to a Rhessi flare's csv data
@@ -171,6 +104,7 @@ class RhessiFlare {
         $event = new HelioviewerEvent();
         $event->id = $this->data["id"];
         $event->label = "RHESSI " . $event->id;
+        $event->short_label = Date::FormatDate($this->data["start"]);
         $event->title = $event->label;
         $event->version = "";
         $event->type = "FL";
@@ -182,5 +116,73 @@ class RhessiFlare {
         $event->hpc_y = floatval($this->data["yloc"]);
         $event->link = $this->link();
         return $event;
+    }
+
+    /**
+     * Parses a subset of the RHESSI Flare List csv into the Helioviewer event format
+     * The subset is determined by $extra['start'] (DateTimeInterface) and $extra['length'] (DateInterval)
+     *
+     * Originally, this was going to parse the entire RHESSI Flare list into Helioviewer Event Format
+     * and then filter results later, but the flare list is too large to store in-memory for PHP.
+     * The default limit is 128MB, and I'd rather not require Helioviewer hosts to need to modify
+     * their memory limits as it just adds more complexity to system management.
+     * Instead, this reads the flare CSV and only processes the values which fall in
+     * the query range. Data is still cached on the hour, but since this data is static,
+     * the cached values do not expire.
+     *
+     * @param string $csv the contents of the csv flare list
+     * @param array $extra Array with the following keys: offset => int, start => DateTimeInterface, length => DateInterval
+     */
+    public static function Translate(string $csv, mixed $extra, ?callable $postprocessor): array {
+        // $extra must have certain keys for the RhessiFlare translator
+        // offset - The start of the data within the csv file
+        // start - A DateTime instance representing an endpoint of the query range.
+        // length - A DateInterval instance which represents the desired time range
+        //          when combined with the start time.
+        if (!array_key_exists("offset", $extra) ||
+            !array_key_exists("start", $extra) ||
+            !array_key_exists("length", $extra)) {
+                throw new Exception(
+                    "Missing required extra parameters for RhessiFlare Translator.
+                    Expected 'offset', 'start', and 'length'. Got " . print_r(array_keys($extra), true)
+                );
+        }
+        // Setup the data that's going to be returned
+        $groups = [
+            [
+                'name' => 'Flare',
+                'contact' => '',
+                'url' => 'https://umbra.nascom.nasa.gov/rhessi/rhessi_extras/flare_images_v2/hsi_flare_image_archive.html',
+                'data' => []
+            ]
+        ];
+        $stream = string_stream($csv);
+        // Move pointer to the first item in the csv.
+        fseek($stream, $extra['offset']);
+        $count = 0;
+        $saved = 0;
+        while ($data = fgetcsv($stream)) {
+            $count += 1;
+            $flare = new RhessiFlare($data);
+            if ($flare->withinRange($extra['start'], $extra['length'])) {
+                $event = $flare->asEvent();
+                if (isset($postprocessor)) {
+                    $event = $postprocessor($event);
+                }
+                $saved += 1;
+                array_push($groups[0]['data'], (array) $event);
+            } else if ($flare->isAfterRange($extra['start'], $extra['length'])) {
+                // The flare list is sorted by start time, so as soon as we find
+                // a flare that's after the time range, we can exit since we know
+                // there will be no more flares to process.
+                // Flares before the time range must still be checked.
+                break;
+            }
+        }
+        return [
+            "name" => "Solar Flares",
+            "pin"  => "F2",
+            "groups" => $groups
+        ];
     }
 }

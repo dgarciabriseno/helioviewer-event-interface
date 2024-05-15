@@ -13,6 +13,10 @@ class HelioviewerEvent
     public string $id;
     /** Event label, this appears next to the pin on Helioviewer.org */
     public string $label;
+
+    /** Event short label, this appears to be short version of the label */
+    public string $short_label;
+
     /** Event version */
     public string $version;
     /** Type of event, this is used to select the pin to display on helioviewer */
