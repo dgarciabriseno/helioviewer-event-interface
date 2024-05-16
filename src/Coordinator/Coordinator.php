@@ -36,7 +36,7 @@ class Coordinator {
      * Converts latitude and longitude coordinates at
      * the given time to Helioprojective coordinates
      */
-    public function hgs2hpc(float $latitude, float $longitude, string $date) {
+    public static function Hgs2Hpc(float $latitude, float $longitude, string $date) {
         try {
             $result = file_get_contents(HV_COORDINATOR_URL . "/hgs2hpc?lat=" . $latitude . "&lon=" . $longitude . "&obstime=" . urlencode($date));
             $response = json_decode($result, true);
