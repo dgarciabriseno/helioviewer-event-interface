@@ -46,7 +46,7 @@ final class SourcesTest extends TestCase
         }
 
         // Verify same keys are computed with a different date within the same hour
-        $newDate = Cache::RoundDate($now);
+        $newDate = DateTime::createFromFormat('Y-m-d H:i:s', $now->format('Y-m-d H:59:59'));
         foreach (Sources::All() as $source) {
             $key = $source->GetCacheKey($newDate, $interval);
             $this->assertContains($key, $keys);
