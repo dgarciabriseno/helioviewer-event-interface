@@ -5,7 +5,10 @@
     "bin": ["bin/hgs2hpc.py", "bin/start_hgs2hpc", "bin/clear_cache.php"],
     "license": "MPL-2.0",
     "scripts": {
-        "test-all": "vendor/bin/phpunit --bootstrap tests/bootstrap.php --fail-on-warning tests",
+        "test-all": [
+            "Composer\\Config::disableProcessTimeout",
+            "vendor/bin/phpunit --bootstrap tests/bootstrap.php  --fail-on-warning tests"
+        ],
         "test": "vendor/bin/phpunit --bootstrap tests/bootstrap.php --fail-on-warning tests --filter"
     },
     "autoload": {
