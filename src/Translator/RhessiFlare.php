@@ -31,7 +31,7 @@ class RhessiFlare {
     private array $data;
 
     public function __construct(array $data) {
-        $keys = explode(",", "id,start,peak,end,peakrate,totalcounts,xloc,yloc,hi_band,ntime,nen,link");
+        $keys = explode(",", "id,start,peak,end,peakrate,totalcounts,xloc,yloc,hi_band,dsun,ntime,nen,link");
         $this->data = CsvParser::Associate($keys, $data);
         // Convert date strings into dates
         $this->data["start"] = new DateTimeImmutable($this->data["start"]);
