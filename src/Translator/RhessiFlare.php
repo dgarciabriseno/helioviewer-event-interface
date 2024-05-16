@@ -6,6 +6,7 @@ use \DateInterval;
 use \DateTimeImmutable;
 use \DateTimeInterface;
 use Exception;
+use HelioviewerEventInterface\Coordinator\Coordinator;
 use HelioviewerEventInterface\Types\EventLink;
 use HelioviewerEventInterface\Types\HelioviewerEvent;
 use HelioviewerEventInterface\Util\CsvParser;
@@ -112,8 +113,9 @@ class RhessiFlare {
         $event->end = Date::FormatDate($this->data["end"]);
         $event->source = $this->data;
         $event->views = $this->views();
-        $event->hpc_x = floatval($this->data["xloc"]);
-        $event->hpc_y = floatval($this->data["yloc"]);
+        $coord = Coordinator::HPC($this->data["xloc"], $this->data["yloc"], $this->data["peak"]);
+        $event->hpc_x = $coord;
+        $event->hpc_y = $coord;
         $event->link = $this->link();
         return $event;
     }
@@ -133,7 +135,7 @@ class RhessiFlare {
      * @param string $csv the contents of the csv flare list
      * @param array $extra Array with the following keys: offset => int, start => DateTimeInterface, length => DateInterval
      */
-    public static function Translate(string $csv, mixed $extra, ?callable $postprocessor): array {
+    public static function Translate(string $csv, mixed $extra): array {
         // $extra must have certain keys for the RhessiFlare translator
         // offset - The start of the data within the csv file
         // start - A DateTime instance representing an endpoint of the query range.
@@ -166,9 +168,6 @@ class RhessiFlare {
             $flare = new RhessiFlare($data);
             if ($flare->withinRange($extra['start'], $extra['length'])) {
                 $event = $flare->asEvent();
-                if (isset($postprocessor)) {
-                    $event = $postprocessor($event);
-                }
                 $saved += 1;
                 array_push($groups[0]['data'], (array) $event);
             } else if ($flare->isAfterRange($extra['start'], $extra['length'])) {
