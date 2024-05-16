@@ -48,11 +48,8 @@ jobs:
     - name: Install dependencies
       run: composer install --prefer-dist --no-progress
 
-    - name: Start Hgs2Hpc server
-      run: bin/start_hgs2hpc
-
-    # Add a test script to composer.json, for instance: "test": "vendor/bin/phpunit"
-    # Docs: https://getcomposer.org/doc/articles/scripts.md
+    - name: Start Coordinator server
+      run: docker run --rm -p 9000:80 -dt dgarciabriseno/hv-coordinator
 
     - name: Run test suite
       run: composer run-script test-all
