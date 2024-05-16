@@ -16,7 +16,7 @@ final class CsvDataSourceTest extends TestCase
             "Flare List",
             "https://hesperia.gsfc.nasa.gov/~kim/rhessi_helioviewer/rhessi_flares_helioviewer.txt",
             $translator,
-            ["offset" => 635]
+            ["offset" => 682]
         );
     }
 
@@ -27,7 +27,7 @@ final class CsvDataSourceTest extends TestCase
             "file://" . __DIR__ . "/../data/rhessi_flares_helioviewer.txt",
             $translator,
             // Location of the first data row in the csv file
-            ["offset" => 635]
+            ["offset" => 682]
         );
     }
 
