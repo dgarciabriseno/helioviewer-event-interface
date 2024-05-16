@@ -3,14 +3,14 @@
 namespace HelioviewerEventInterface\Translator;
 
 use DateTime;
-use HelioviewerEventInterface\Coordinator\Hgs2Hpc;
+use HelioviewerEventInterface\Coordinator\Coordinator;
 use HelioviewerEventInterface\Types\HelioviewerEvent;
 use HelioviewerEventInterface\Util\HapiRecord;
 
 const FLARE_CLASSES = ["C", "CPlus", "M", "MPlus", "X"];
 
 class FlarePrediction {
-    
+
     public static function Translate(array $data, string $method, ?callable $postProcessor): array {
         $groups = [
             [
@@ -25,7 +25,6 @@ class FlarePrediction {
         }
 
         $parameters = $data['parameters'];
-        $coord = new Hgs2Hpc();
         // Preprocess to only grab the latest predictions
         $records = array_map(function ($record) use ($parameters) { return new HapiRecord($record, $parameters, ""); }, $data['data']);
         $dateStrings = array_column($records, 'start_window');
@@ -57,7 +56,7 @@ class FlarePrediction {
             if (is_null($lat) || is_null($long) || is_null($time)) {
                 continue;
             }
-            $hpc = $coord->convert(GetLatitude($prediction), GetLongitude($prediction), GetTime($prediction));
+            $hpc = Coordinator::Hgs2Hpc(GetLatitude($prediction), GetLongitude($prediction), GetTime($prediction));
             $event->hpc_x = $hpc['x'];
             $event->hpc_y = $hpc['y'];
             if ($postProcessor) {

@@ -51,7 +51,6 @@ function Translate(array $flares, mixed $extra, ?callable $postProcessor): array
         ]
     ];
     $data = &$groups[0]['data'];
-    $hgs2hpc = new Hgs2Hpc();
     foreach ($flares as $flare) {
         $flare = new Flare($flare);
         $event = new HelioviewerEvent();
@@ -63,7 +62,7 @@ function Translate(array $flares, mixed $extra, ?callable $postProcessor): array
         $event->end = $flare->end();
         $event->source = $flare->flare;
         $event->views = $flare->views();
-        list($event->hpc_x, $event->hpc_y) = $flare->hpc($hgs2hpc);
+        list($event->hpc_x, $event->hpc_y) = $flare->hpc();
         $event->link = $flare->link();
         if ($postProcessor) {
             $event = $postProcessor($event);

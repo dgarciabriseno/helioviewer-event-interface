@@ -29,9 +29,9 @@ class HelioviewerEvent
     public array $source;
     /** Tab views */
     public array $views;
-    /** x position, use hgs2hpc if you only have a heliographic position */
+    /** x position, use Coordinator::Hgs2Hpc if you only have a heliographic position */
     public float $hpc_x;
-    /** y position, use hgs2hpc if you only have a heliographic position */
+    /** y position, use Coordinator::Hgs2Hpc if you only have a heliographic position */
     public float $hpc_y;
 
     /**
