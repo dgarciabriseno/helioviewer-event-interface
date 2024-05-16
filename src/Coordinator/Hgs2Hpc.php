@@ -10,7 +10,7 @@ class Hgs2Hpc {
      */
     public function convert(float $latitude, float $longitude, string $date) {
         try {
-            $result = file_get_contents(HV_COORDINATOR_URL . "/hgs2hpc?lat=" . $latitude . "&lon=" . $longitude . "&obstime=" . $date);
+            $result = file_get_contents(HV_COORDINATOR_URL . "/hgs2hpc?lat=" . $latitude . "&lon=" . $longitude . "&obstime=" . urlencode($date));
             $response = json_decode($result, true);
             // The response format from the API is just x, y, but better to
             // not make any assumptions. Handle the error here instead of
