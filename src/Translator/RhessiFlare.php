@@ -135,7 +135,7 @@ class RhessiFlare {
      * @param string $csv the contents of the csv flare list
      * @param array $extra Array with the following keys: offset => int, start => DateTimeInterface, length => DateInterval
      */
-    public static function Translate(string $csv, mixed $extra, ?callable $postProcessor): array {
+    public static function Translate(string $csv, mixed $extra, ?callable $postprocessor): array {
         // $extra must have certain keys for the RhessiFlare translator
         // offset - The start of the data within the csv file
         // start - A DateTime instance representing an endpoint of the query range.
@@ -168,8 +168,8 @@ class RhessiFlare {
             $flare = new RhessiFlare($data);
             if ($flare->withinRange($extra['start'], $extra['length'])) {
                 $event = $flare->asEvent();
-                if ($postProcessor) {
-                    $event = $postProcessor($event);
+                if (isset($postprocessor)) {
+                    $event = $postprocessor($event);
                 }
                 $saved += 1;
                 array_push($groups[0]['data'], (array) $event);
