@@ -105,7 +105,7 @@ class RhessiFlare {
         $event = new HelioviewerEvent();
         $event->id = $this->data["id"];
         $event->label = "RHESSI " . $event->id;
-        $event->short_label = Date::FormatDate($this->data["start"]);
+        $event->short_label = $this->data["id"] . ": " . Date::FormatDate($this->data["start"]);
         $event->title = $event->label;
         $event->version = "";
         $event->type = "FL";
