@@ -116,6 +116,8 @@ class RhessiFlare {
         $coord = Coordinator::HPC(floatval($this->data["xloc"]), floatval($this->data["yloc"]), Date::FormatDate($this->data["peak"]));
         $event->hpc_x = $coord['x'];
         $event->hpc_y = $coord['y'];
+        $event->hv_hpc_x = $event->hpc_x;
+        $event->hv_hpc_y = $event->hpc_y;
         $event->link = $this->link();
         return $event;
     }
