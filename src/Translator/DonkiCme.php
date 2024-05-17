@@ -30,8 +30,8 @@ function TranslateCME(array $record, ?callable $postProcessor): array {
     $event->type    = 'CE';
     $event->start   = $start->format('Y-m-d H:i:s');
     $event->end     = $end->format('Y-m-d H:i:s');
-    $event->hpc_x   = $hpc['x'];
-    $event->hpc_y   = $hpc['y'];
+    $event->hv_hpc_x   = $hpc['x'];
+    $event->hv_hpc_y   = $hpc['y'];
     $event->link    = $cme->link();
     $event->views   = $cme->views();
 

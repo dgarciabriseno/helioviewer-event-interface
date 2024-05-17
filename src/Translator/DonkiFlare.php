@@ -139,7 +139,7 @@ class DonkiFlare {
             $event->end = $flare->end();
             $event->source = $flare->flare;
             $event->views = $flare->views();
-            list($event->hpc_x, $event->hpc_y) = $flare->hpc();
+            list($event->hv_hpc_x, $event->hv_hpc_y) = $flare->hpc();
             $event->link = $flare->link();
             if ($postProcessor) {
                 $event = $postProcessor($event);

@@ -114,10 +114,8 @@ class RhessiFlare {
         $event->source = $this->data;
         $event->views = $this->views();
         $coord = Coordinator::HPC(floatval($this->data["xloc"]), floatval($this->data["yloc"]), Date::FormatDate($this->data["peak"]));
-        $event->hpc_x = $coord['x'];
-        $event->hpc_y = $coord['y'];
-        $event->hv_hpc_x = $event->hpc_x;
-        $event->hv_hpc_y = $event->hpc_y;
+        $event->hv_hpc_x = $coord['x'];
+        $event->hv_hpc_y = $coord['y'];
         $event->link = $this->link();
         return $event;
     }
@@ -137,7 +135,7 @@ class RhessiFlare {
      * @param string $csv the contents of the csv flare list
      * @param array $extra Array with the following keys: offset => int, start => DateTimeInterface, length => DateInterval
      */
-    public static function Translate(string $csv, mixed $extra): array {
+    public static function Translate(string $csv, mixed $extra, ?callable $postProcessor): array {
         // $extra must have certain keys for the RhessiFlare translator
         // offset - The start of the data within the csv file
         // start - A DateTime instance representing an endpoint of the query range.
@@ -170,6 +168,9 @@ class RhessiFlare {
             $flare = new RhessiFlare($data);
             if ($flare->withinRange($extra['start'], $extra['length'])) {
                 $event = $flare->asEvent();
+                if ($postProcessor) {
+                    $event = $postProcessor($event);
+                }
                 $saved += 1;
                 array_push($groups[0]['data'], (array) $event);
             } else if ($flare->isAfterRange($extra['start'], $extra['length'])) {

@@ -29,10 +29,16 @@ class HelioviewerEvent
     public array $source;
     /** Tab views */
     public array $views;
-    /** x position, use Coordinator::Hgs2Hpc if you only have a heliographic position */
-    public float $hpc_x;
-    /** y position, use Coordinator::Hgs2Hpc if you only have a heliographic position */
-    public float $hpc_y;
+    /**
+     * x position as it should appear on Helioviewer,
+     * use Coordinator::Hgs2Hpc if you only have a heliographic position
+     */
+    public float $hv_hpc_x;    // Reserved
+    /**
+     * y position as it should appear on Helioviewer,
+     * use Coordinator::Hgs2Hpc if you only have a heliographic position
+     */
+    public float $hv_hpc_y;    // Reserved
 
     /**
      * Optional Fields
@@ -41,10 +47,4 @@ class HelioviewerEvent
     public string $title;      // Optional, but preferred
     /** Link to event data outside of Helioviewer, if applicable */
     public ?EventLink $link;   // Optional
-
-    /**
-     * Reserved for internal use fields
-     */
-    public float $hv_hpc_x;    // Reserved
-    public float $hv_hpc_y;    // Reserved
 }

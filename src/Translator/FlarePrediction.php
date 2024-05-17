@@ -57,8 +57,8 @@ class FlarePrediction {
                 continue;
             }
             $hpc = Coordinator::Hgs2Hpc(GetLatitude($prediction), GetLongitude($prediction), GetTime($prediction));
-            $event->hpc_x = $hpc['x'];
-            $event->hpc_y = $hpc['y'];
+            $event->hv_hpc_x = $hpc['x'];
+            $event->hv_hpc_y = $hpc['y'];
             if ($postProcessor) {
                 $event = $postProcessor($event);
             }
