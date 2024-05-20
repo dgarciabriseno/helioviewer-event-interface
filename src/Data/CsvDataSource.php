@@ -30,11 +30,8 @@ class CsvDataSource extends DataSource {
     /** HTTP Request */
     private PromiseInterface $request;
 
-    /** Extra data to send to the postprocessor */
+    /** Extra data to send to the translator */
     private array $extra;
-
-    /** Postprocessor to run on the data */
-    private mixed $postprocessor;
 
     /**
      * Construct a csv data source
@@ -55,15 +52,13 @@ class CsvDataSource extends DataSource {
      * Loads the csv into the memory, either from the source or cache
      * @param DateTimeInterface $start Start of time range
      * @param DateInterval $length Length of time to query
-     * @param callable $postprocessor Executable function to call on each Helioviewer Event processed during the query
      * @return PromiseInterface
      */
-    public function beginQuery(DateTimeInterface $start, DateInterval $length, ?callable $postprocessor = null)
+    public function beginQuery(DateTimeInterface $start, DateInterval $length)
     {
         // Store the query results so they can be used later. The whole csv is
         // cached, so these parameters aren't used in the query, but will be
         // used to filter the data in getResult.
-        $this->postprocessor = $postprocessor;
         $this->extra["start"] = $start;
         $this->extra["length"] = $length;
 
@@ -75,7 +70,7 @@ class CsvDataSource extends DataSource {
 
         // PHP 8: str_starts_with
         if (str_starts_with($this->uri, "http")) {
-            $this->_LoadRemoteCsv($postprocessor);
+            $this->_LoadRemoteCsv();
         } else if (str_starts_with($this->uri, "file://")) {
             // don't do anything for local files here.
         } else {
@@ -83,14 +78,14 @@ class CsvDataSource extends DataSource {
         }
     }
 
-    private function _LoadRemoteCsv(?callable $postprocessor = null) {
+    private function _LoadRemoteCsv() {
         // Get a reference to the cache for this csv.
         // On cache miss, send the request
         $client = $this->GetClient();
         $promise = $client->requestAsync("GET", $this->uri);
-        $this->request = $promise->then(function (ResponseInterface $response) use ($postprocessor) {
+        $this->request = $promise->then(function (ResponseInterface $response) {
                 if ($response->getStatusCode() == 200) {
-                    return $this->Translate($response->getBody()->getContents(), $this->extra, $postprocessor);
+                    return $this->Translate($response->getBody()->getContents(), $this->extra);
                 } else {
                     return [];
                 }
@@ -105,7 +100,7 @@ class CsvDataSource extends DataSource {
 
     private function _LoadLocalCsv(): array {
         $csv = file_get_contents(str_replace("file://", "", $this->uri));
-        $data = $this->Translate($csv, $this->extra, $this->postprocessor);
+        $data = $this->Translate($csv, $this->extra);
         Cache::Set($this->cache->getKey(), new DateInterval("P100Y"), $data);
         return $this->_filterResults($data);
     }

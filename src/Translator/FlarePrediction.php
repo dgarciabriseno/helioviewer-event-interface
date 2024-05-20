@@ -11,7 +11,7 @@ const FLARE_CLASSES = ["C", "CPlus", "M", "MPlus", "X"];
 
 class FlarePrediction {
 
-    public static function Translate(array $data, string $method, ?callable $postProcessor): array {
+    public static function Translate(array $data, string $method): array {
         $groups = [
             [
                 'name' => $method,
@@ -59,9 +59,6 @@ class FlarePrediction {
             $hpc = Coordinator::Hgs2Hpc(GetLatitude($prediction), GetLongitude($prediction), GetTime($prediction));
             $event->hv_hpc_x = $hpc['x'];
             $event->hv_hpc_y = $hpc['y'];
-            if ($postProcessor) {
-                $event = $postProcessor($event);
-            }
             array_push($result, (array) $event);
         }
         return $groups;

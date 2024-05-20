@@ -16,7 +16,7 @@ use HelioviewerEventInterface\Util\Date;
 class IgnoreCme extends Exception {}
 
 
-function TranslateCME(array $record, ?callable $postProcessor): array {
+function TranslateCME(array $record): array {
     $start = new DateTimeImmutable($record['startTime']);
     $end = $start->add(new DateInterval("P1D"));
     $cme = new DonkiCme($record);
@@ -34,11 +34,6 @@ function TranslateCME(array $record, ?callable $postProcessor): array {
     $event->hv_hpc_y   = $hpc['y'];
     $event->link    = $cme->link();
     $event->views   = $cme->views();
-
-
-    if (isset($postProcessor)) {
-        $event = $postProcessor($event);
-    }
 
     $event->source = $record;
     return (array) $event;
@@ -297,7 +292,7 @@ class DonkiCme {
         return $text;
     }
 
-    public static function Translate(array $data, mixed $extra, ?callable $postProcessor): array {
+    public static function Translate(array $data, mixed $extra): array {
         $groups = [
             [
                 'name' => "CME",
@@ -308,7 +303,7 @@ class DonkiCme {
         ];
         foreach ($data as $record) {
             try {
-                $cme = TranslateCME($record, $postProcessor);
+                $cme = TranslateCME($record);
                 array_push($groups[0]['data'], $cme);
             }
             catch (IgnoreCme) {

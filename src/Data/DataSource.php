@@ -38,10 +38,9 @@ abstract class DataSource {
      * Use getResult() to get the response from the last query.
      * @param DateTimeInterface $start Start of time range
      * @param DateInterval $length Length of time to query
-     * @param callable $postprocessor Executable function to call on each Helioviewer Event processed during the query
      * @return PromiseInterface
      */
-    abstract public function beginQuery(DateTimeInterface $start, DateInterval $length, ?callable $postprocessor = null);
+    abstract public function beginQuery(DateTimeInterface $start, DateInterval $length);
 
     /**
      * Returns the result from the last query started with beginQuery
@@ -63,12 +62,12 @@ abstract class DataSource {
         return self::$HttpClient;
     }
 
-    protected function Translate(mixed $data, mixed $extra = null, ?callable $postprocessor = null): array {
+    protected function Translate(mixed $data, mixed $extra = null): array {
         if (is_null($this->translator)) {
             throw new Exception("Translator is null, you probably didn't call parent::__construct");
         }
 
         // Ah yes, indulge in string execution.
-        return "HelioviewerEventInterface\\Translator\\$this->translator::Translate"($data, $extra, $postprocessor);
+        return "HelioviewerEventInterface\\Translator\\$this->translator::Translate"($data, $extra);
     }
 }

@@ -41,7 +41,7 @@ The parameters describe the source, label for the data, pin to use on Helioviewe
 
 2. We define the translator `src/Translator/DonkiFlare.php`. This file defines a function named `Translate` which will accept the data from the API request, and parse each record into a `HelioviewerEvent`.
 ```php
-function Translate(array $flares, mixed $extra, ?callable $postProcessor): array {
+function Translate(array $flares, mixed $extra): array {
     $groups = [
         [
             'name' => 'Solar Flares',
@@ -64,9 +64,6 @@ function Translate(array $flares, mixed $extra, ?callable $postProcessor): array
         $event->views = $flare->views();
         list($event->hv_hpc_x, $event->hv_hpc_y) = $flare->hpc();
         $event->link = $flare->link();
-        if ($postProcessor) {
-            $event = $postProcessor($event);
-        }
         array_push($data, (array) $event);
     }
     return $groups;

@@ -117,7 +117,7 @@ class DonkiFlare {
     }
 
 
-    public static function Translate(array $flares, mixed $extra, ?callable $postProcessor): array {
+    public static function Translate(array $flares, mixed $extra): array {
         $groups = [
             [
                 'name' => 'Solar Flares',
@@ -141,9 +141,6 @@ class DonkiFlare {
             $event->views = $flare->views();
             list($event->hv_hpc_x, $event->hv_hpc_y) = $flare->hpc();
             $event->link = $flare->link();
-            if ($postProcessor) {
-                $event = $postProcessor($event);
-            }
             array_push($data, (array) $event);
         }
         return $groups;
