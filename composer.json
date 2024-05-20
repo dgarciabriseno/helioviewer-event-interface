@@ -7,9 +7,9 @@
     "scripts": {
         "test-all": [
             "Composer\\Config::disableProcessTimeout",
-            "vendor/bin/phpunit -c tests/phpunit.xml tests"
+            "XDEBUG_MODE=coverage vendor/bin/phpunit -c tests/phpunit.xml tests"
         ],
-        "test": "vendor/bin/phpunit -c tests/phpunit.xml tests --filter",
+        "test": "XDEBUG_MODE=coverage vendor/bin/phpunit -c tests/phpunit.xml tests --filter",
         "coverage": "php -t coverage -S localhost:8000"
     },
     "autoload": {
