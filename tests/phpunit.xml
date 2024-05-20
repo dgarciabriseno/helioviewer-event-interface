@@ -1,0 +1,10 @@
+<phpunit bootstrap="bootstrap.php" failOnWarning="true" >
+    <coverage>
+        <include>
+            <directory suffix=".php">../src</directory>
+        </include>
+        <report>
+            <html outputDirectory="../coverage" />
+        </report>
+    </coverage>
+</phpunit>
