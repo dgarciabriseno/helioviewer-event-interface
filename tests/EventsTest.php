@@ -23,12 +23,10 @@ final class EventsTest extends TestCase
      */
     public function testGetEvents(): void
     {
-        $result = Events::GetFromSource(["DONKI"], $this->START_DATE, $this->LENGTH, function ($record) {$record->hv_hpc_x = 999; return $record;});
+        $result = Events::GetFromSource(["DONKI"], $this->START_DATE, $this->LENGTH);
         $this->assertTrue(is_array($result));
         $this->assertEquals(1, count($result));
         $this->assertTrue(array_key_exists('groups', $result[0]));
-        // Verify closure works
-        $this->assertEquals(999, $result[0]['groups'][0]['data'][0]['hv_hpc_x']);
     }
 
     /**
