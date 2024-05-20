@@ -33,12 +33,12 @@ class HelioviewerEvent
      * x position as it should appear on Helioviewer,
      * use Coordinator::Hgs2Hpc if you only have a heliographic position
      */
-    public float $hv_hpc_x;    // Reserved
+    public float $hv_hpc_x;
     /**
      * y position as it should appear on Helioviewer,
      * use Coordinator::Hgs2Hpc if you only have a heliographic position
      */
-    public float $hv_hpc_y;    // Reserved
+    public float $hv_hpc_y;
 
     /**
      * Optional Fields
