@@ -18,8 +18,8 @@ final class FlarePredictionTest extends TestCase
             foreach ($section['groups'] as $group) {
                 foreach ($group['data'] as $record) {
                     $count += 1;
-                    isset($record['hpc_x']);
-                    isset($record['hpc_y']);
+                    $this->assertArrayHasKey('hpc_x', $record);
+                    $this->assertArrayHasKey('hpc_y', $record);
                 }
             }
         }
