@@ -7,7 +7,7 @@ use \DateTimeImmutable;
 use \Exception;
 use \Throwable;
 use HelioviewerEventInterface\Types\HelioviewerEvent;
-use HelioviewerEventInterface\Coordinator\Hgs2Hpc;
+use HelioviewerEventInterface\Coordinator\Coordinator;
 use HelioviewerEventInterface\Types\EventLink;
 use HelioviewerEventInterface\Util\Camel2Title;
 use HelioviewerEventInterface\Util\Subarray;
@@ -16,11 +16,11 @@ use HelioviewerEventInterface\Util\Date;
 class IgnoreCme extends Exception {}
 
 
-function TranslateCME(array $record, Hgs2Hpc $hgs2hpc, ?callable $postProcessor): array {
+function TranslateCME(array $record, ?callable $postProcessor): array {
     $start = new DateTimeImmutable($record['startTime']);
     $end = $start->add(new DateInterval("P1D"));
     $cme = new DonkiCme($record);
-    $hpc = $hgs2hpc->convert($cme->latitude, $cme->longitude, $start->format('Y-m-d\TH:i:s\Z'));
+    $hpc = Coordinator::Hgs2Hpc($cme->latitude, $cme->longitude, $start->format('Y-m-d\TH:i:s\Z'));
 
     $event = new HelioviewerEvent();
     $event->id      = $record['activityID'];
@@ -30,8 +30,8 @@ function TranslateCME(array $record, Hgs2Hpc $hgs2hpc, ?callable $postProcessor)
     $event->type    = 'CE';
     $event->start   = $start->format('Y-m-d H:i:s');
     $event->end     = $end->format('Y-m-d H:i:s');
-    $event->hpc_x   = $hpc['x'];
-    $event->hpc_y   = $hpc['y'];
+    $event->hv_hpc_x   = $hpc['x'];
+    $event->hv_hpc_y   = $hpc['y'];
     $event->link    = $cme->link();
     $event->views   = $cme->views();
 
@@ -306,12 +306,9 @@ class DonkiCme {
                 'data' => []
             ]
         ];
-        // Breaking encapsulation a bit... but creating one overall Hgs2Hpc instance means it will reuse the socket connection for each record.
-        // This should give a slight performance improvement since it doesn't need to create a new connection for each record.
-        $hgs2hpc = new Hgs2Hpc();
         foreach ($data as $record) {
             try {
-                $cme = TranslateCME($record, $hgs2hpc, $postProcessor);
+                $cme = TranslateCME($record, $postProcessor);
                 array_push($groups[0]['data'], $cme);
             }
             catch (IgnoreCme) {

@@ -25,7 +25,7 @@ class Sources {
             new JsonDataSource("CCMC", "Solar Flare Predictions", "FP", "https://iswa.gsfc.nasa.gov/IswaSystemWebApp/flarescoreboard/hapi/data", "time.min", "time.max", "Y-m-d\TH:i:s", "FlarePrediction", ["id" => "MAG4_SHARP_REGIONS", "format" => "json", "include" => "header"], "MAG4 Sharp"),
             new JsonDataSource("CCMC", "Solar Flare Predictions", "FP", "https://iswa.gsfc.nasa.gov/IswaSystemWebApp/flarescoreboard/hapi/data", "time.min", "time.max", "Y-m-d\TH:i:s", "FlarePrediction", ["id" => "MAG4_SHARP_HMI_REGIONS", "format" => "json", "include" => "header"], "MAG4 Sharp HMI"),
             new JsonDataSource("CCMC", "Solar Flare Predictions", "FP", "https://iswa.gsfc.nasa.gov/IswaSystemWebApp/flarescoreboard/hapi/data", "time.min", "time.max", "Y-m-d\TH:i:s", "FlarePrediction", ["id" => "AEffort_REGIONS", "format" => "json", "include" => "header"], "AEffort"),
-            new CsvDataSource ("RHESSI", "Flare List", "file://" . __DIR__ . "/../data/rhessi_flares_helioviewer.txt", "RhessiFlare", ['offset' => 682]),
+            new CsvDataSource ("RHESSI", "Flare List", "file://" . __DIR__ . "/../data/rhessi_flares_helioviewer.txt", "RhessiFlare", ['offset' => 687]),
         ];
     }
 

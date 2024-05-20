@@ -2,14 +2,15 @@
     "name": "helioviewer/event-interface",
     "description": "Interface for querying external data sources for Helioviewer",
     "type": "library",
-    "bin": ["bin/hgs2hpc.py", "bin/start_hgs2hpc", "bin/clear_cache.php"],
+    "bin": ["bin/clear_cache.php"],
     "license": "MPL-2.0",
     "scripts": {
         "test-all": [
             "Composer\\Config::disableProcessTimeout",
-            "vendor/bin/phpunit --bootstrap tests/bootstrap.php  --fail-on-warning tests"
+            "XDEBUG_MODE=coverage vendor/bin/phpunit -c tests/phpunit.xml tests"
         ],
-        "test": "vendor/bin/phpunit --bootstrap tests/bootstrap.php --fail-on-warning tests --filter"
+        "test": "XDEBUG_MODE=coverage vendor/bin/phpunit -c tests/phpunit.xml tests --filter",
+        "coverage": "php -t coverage -S localhost:8000"
     },
     "autoload": {
         "psr-4": {"HelioviewerEventInterface\\": "src/"}

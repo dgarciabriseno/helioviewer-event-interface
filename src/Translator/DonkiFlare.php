@@ -2,9 +2,8 @@
 
 namespace HelioviewerEventInterface\Translator;
 
-use \Exception;
 use \DateTime;
-use HelioviewerEventInterface\Coordinator\Hgs2Hpc;
+use HelioviewerEventInterface\Coordinator\Coordinator;
 use HelioviewerEventInterface\Types\EventLink;
 use HelioviewerEventInterface\Types\HelioviewerEvent;
 use HelioviewerEventInterface\Util\LocationParser;
@@ -33,9 +32,9 @@ class DonkiFlare {
         }
     }
 
-    public function hpc(Hgs2Hpc $hgs2hpc): array {
+    public function hpc(): array {
         $location = LocationParser::ParseText($this->flare['sourceLocation']);
-        $value = $hgs2hpc->convert($location[0], $location[1], $this->peak()->format('Y-m-d\TH:i:s\Z'));
+        $value = Coordinator::Hgs2Hpc($location[0], $location[1], $this->peak()->format('Y-m-d\TH:i:s\Z'));
         return [$value['x'], $value['y']];
     }
 
@@ -128,7 +127,6 @@ class DonkiFlare {
             ]
         ];
         $data = &$groups[0]['data'];
-        $hgs2hpc = new Hgs2Hpc();
         foreach ($flares as $flare) {
             $flare = new self($flare);
             $event = new HelioviewerEvent();
@@ -141,7 +139,7 @@ class DonkiFlare {
             $event->end = $flare->end();
             $event->source = $flare->flare;
             $event->views = $flare->views();
-            list($event->hpc_x, $event->hpc_y) = $flare->hpc($hgs2hpc);
+            list($event->hv_hpc_x, $event->hv_hpc_y) = $flare->hpc();
             $event->link = $flare->link();
             if ($postProcessor) {
                 $event = $postProcessor($event);

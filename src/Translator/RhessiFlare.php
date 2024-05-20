@@ -6,6 +6,7 @@ use \DateInterval;
 use \DateTimeImmutable;
 use \DateTimeInterface;
 use Exception;
+use HelioviewerEventInterface\Coordinator\Coordinator;
 use HelioviewerEventInterface\Types\EventLink;
 use HelioviewerEventInterface\Types\HelioviewerEvent;
 use HelioviewerEventInterface\Util\CsvParser;
@@ -104,7 +105,7 @@ class RhessiFlare {
         $event = new HelioviewerEvent();
         $event->id = $this->data["id"];
         $event->label = "RHESSI " . $event->id;
-        $event->short_label = Date::FormatDate($this->data["start"]);
+        $event->short_label = $this->data["id"] . ": " . Date::FormatDate($this->data["start"]);
         $event->title = $event->label;
         $event->version = "";
         $event->type = "FL";
@@ -112,8 +113,9 @@ class RhessiFlare {
         $event->end = Date::FormatDate($this->data["end"]);
         $event->source = $this->data;
         $event->views = $this->views();
-        $event->hpc_x = floatval($this->data["xloc"]);
-        $event->hpc_y = floatval($this->data["yloc"]);
+        $coord = Coordinator::HPC(floatval($this->data["xloc"]), floatval($this->data["yloc"]), Date::FormatDate($this->data["peak"]));
+        $event->hv_hpc_x = $coord['x'];
+        $event->hv_hpc_y = $coord['y'];
         $event->link = $this->link();
         return $event;
     }

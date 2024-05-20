@@ -1,3 +1,5 @@
 vendor
 composer.phar
 venv
+coverage
+tests/.phpunit.result.cache
