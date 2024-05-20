@@ -1,6 +1,7 @@
 <?php declare(strict_types=1);
 
 use HelioviewerEventInterface\Coordinator\Coordinator;
+use HelioviewerEventInterface\Coordinator\CoordinatorException;
 use PHPUnit\Framework\TestCase;
 
 final class CoordinatorTest extends TestCase
@@ -13,6 +14,11 @@ final class CoordinatorTest extends TestCase
         $coordinate = Coordinator::HPC(515, -342, "2012-07-05 13:01:46");
         $this->assertEqualsWithDelta(523.6178, $coordinate["x"], 0.0001);
         $this->assertEqualsWithDelta(-347.7228, $coordinate["y"], 0.0001);
+    }
+
+    public function testException() {
+        $this->expectException(CoordinatorException::class);
+        Coordinator::HPC(0, 0, "Invalid Date");
     }
 }
 
