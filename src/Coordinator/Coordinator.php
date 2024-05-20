@@ -4,10 +4,26 @@ namespace HelioviewerEventInterface\Coordinator;
 
 use \Exception;
 
+class CoordinatorException extends Exception {}
+
 /**
  * Interface to the coordinator API
  */
 class Coordinator {
+    /**
+     * Performs a get request to the given url and returns the results
+     * @throws CoordinatorException if the request fails
+     * @param string $url
+     */
+    private static function Get(string $url) {
+        $result = @file_get_contents($url);
+        if (!$result) {
+            $error = error_get_last();
+            throw new CoordinatorException($error['message']);
+        }
+        return $result;
+    }
+
     /**
      * Transforms an HPC coordinate as seen from earth, to an HPC coordinate
      * inside Helioviewer's frame of reference
@@ -16,20 +32,12 @@ class Coordinator {
      * @param $obstime Observation time
      */
     public static function HPC(float $x, float $y, string $obstime) {
-        try {
-            $result = file_get_contents(HV_COORDINATOR_URL . "/hpc?x=" . $x . "&y=" . $y . "&obstime=" . urlencode($obstime));
-            $response = json_decode($result, true);
-            // The response format from the API is just x, y, but better to
-            // not make any assumptions. Handle the error here instead of
-            // on the client.
-            return array("x" => $response["x"], "y" => $response["y"]);
-        } catch (Exception $e) {
-            // On exception, log it and return the original coordinate.
-            // We do this so that the coordinate we show is mostly correct,
-            // rather than halting the processing of all events.
-            error_log($e->getMessage());
-            return array("x" => $x, "y" => $y);
-        }
+        $result = Coordinator::Get(HV_COORDINATOR_URL . "/hpc?x=" . $x . "&y=" . $y . "&obstime=" . urlencode($obstime));
+        $response = json_decode($result, true);
+        // The response format from the API is just x, y, but better to
+        // not make any assumptions. Handle the error here instead of
+        // on the client.
+        return array("x" => $response["x"], "y" => $response["y"]);
     }
 
     /**
@@ -37,17 +45,11 @@ class Coordinator {
      * the given time to Helioprojective coordinates
      */
     public static function Hgs2Hpc(float $latitude, float $longitude, string $date) {
-        try {
-            $result = file_get_contents(HV_COORDINATOR_URL . "/hgs2hpc?lat=" . $latitude . "&lon=" . $longitude . "&obstime=" . urlencode($date));
-            $response = json_decode($result, true);
-            // The response format from the API is just x, y, but better to
-            // not make any assumptions. Handle the error here instead of
-            // on the client.
-            return array("x" => $response["x"], "y" => $response["y"]);
-        } catch (Exception $e) {
-            // On exception, log it and return something.
-            error_log($e->getMessage());
-            return array("x" => 0, "y" => 0);
-        }
+        $result = Coordinator::Get(HV_COORDINATOR_URL . "/hgs2hpc?lat=" . $latitude . "&lon=" . $longitude . "&obstime=" . urlencode($date));
+        $response = json_decode($result, true);
+        // The response format from the API is just x, y, but better to
+        // not make any assumptions. Handle the error here instead of
+        // on the client.
+        return array("x" => $response["x"], "y" => $response["y"]);
     }
 }
