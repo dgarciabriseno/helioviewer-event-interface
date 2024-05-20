@@ -1,5 +1,6 @@
 <?php declare(strict_types=1);
 
+use GuzzleHttp\Exception\RequestException;
 use HelioviewerEventInterface\Coordinator\Coordinator;
 use HelioviewerEventInterface\Coordinator\CoordinatorException;
 use PHPUnit\Framework\TestCase;
@@ -17,7 +18,7 @@ final class CoordinatorTest extends TestCase
     }
 
     public function testException() {
-        $this->expectException(CoordinatorException::class);
+        $this->expectException(RequestException::class);
         Coordinator::HPC(0, 0, "Invalid Date");
     }
 }

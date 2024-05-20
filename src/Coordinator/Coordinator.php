@@ -3,25 +3,27 @@
 namespace HelioviewerEventInterface\Coordinator;
 
 use \Exception;
-
-class CoordinatorException extends Exception {}
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\Exception\ConnectException;
 
 /**
  * Interface to the coordinator API
  */
 class Coordinator {
+    private static ?Client $client = null;
     /**
      * Performs a get request to the given url and returns the results
-     * @throws CoordinatorException if the request fails
+     * @throws RequestException if the request fails.
+     * @throws ConnectionException if the coordinator server can't be reached.
      * @param string $url
      */
     private static function Get(string $url) {
-        $result = @file_get_contents($url);
-        if (!$result) {
-            $error = error_get_last();
-            throw new CoordinatorException($error['message']);
+        if (is_null(Coordinator::$client)) {
+            Coordinator::$client = new Client();
         }
-        return $result;
+        $response = Coordinator::$client->request('GET', $url);
+        return $response->getBody()->getContents();
     }
 
     /**
