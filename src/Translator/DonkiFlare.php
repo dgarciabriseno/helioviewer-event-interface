@@ -3,6 +3,7 @@
 namespace HelioviewerEventInterface\Translator;
 
 use \DateTime;
+use \DateTimeInterface;
 use HelioviewerEventInterface\Coordinator\Coordinator;
 use HelioviewerEventInterface\Types\EventLink;
 use HelioviewerEventInterface\Types\HelioviewerEvent;
@@ -30,12 +31,6 @@ class DonkiFlare {
         } else {
             return '';
         }
-    }
-
-    public function hpc(): array {
-        $location = LocationParser::ParseText($this->flare['sourceLocation']);
-        $value = Coordinator::Hgs2Hpc($location[0], $location[1], $this->peak()->format('Y-m-d\TH:i:s\Z'));
-        return [$value['x'], $value['y']];
     }
 
     public function instruments(): string {
@@ -117,7 +112,7 @@ class DonkiFlare {
     }
 
 
-    public static function Translate(array $flares, mixed $extra, ?callable $postProcessor): array {
+    public static function Translate(array $flares, mixed $extra): array {
         $groups = [
             [
                 'name' => 'Solar Flares',
@@ -139,14 +134,26 @@ class DonkiFlare {
             $event->end = $flare->end();
             $event->source = $flare->flare;
             $event->views = $flare->views();
-            list($event->hv_hpc_x, $event->hv_hpc_y) = $flare->hpc();
             $event->link = $flare->link();
-            if ($postProcessor) {
-                $event = $postProcessor($event);
-            }
             array_push($data, (array) $event);
         }
         return $groups;
     }
 
+    public static function Transform(array $events, DateTimeInterface $obstime): array {
+        $observation_time = Date::FormatDate($obstime);
+        foreach ($events['groups'] as &$group) {
+            // $group:
+            // array('name', 'contact', 'url', 'data')
+            foreach ($group['data'] as &$event) {
+                // event:
+                // array of HelioviewerEvent fields
+                $location = LocationParser::ParseText($event['source']['sourceLocation']);
+                $coord = Coordinator::Hgs2Hpc($location[0], $location[1], $event['source']['peakTime'], $observation_time);
+                $event['hv_hpc_x'] = $coord['x'];
+                $event['hv_hpc_y'] = $coord['y'];
+            }
+        }
+        return $events;
+    }
 }

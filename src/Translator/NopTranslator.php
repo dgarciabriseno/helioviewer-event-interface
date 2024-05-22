@@ -2,6 +2,8 @@
 
 namespace HelioviewerEventInterface\Translator;
 
+use DateTimeInterface;
+
 /**
  * A Translator does not translate
  */
@@ -11,6 +13,10 @@ class NopTranslator {
      */
     public static function Translate(mixed $data): array {
         return [$data];
+    }
+
+    public static function Transform(array $data): array {
+        return $data;
     }
 
 }

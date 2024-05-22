@@ -18,7 +18,7 @@ final class DataSourceTest extends TestCase
     {
         // Test via the DONKI CME data source
         $datasource = new JsonDataSource("DONKI", "CME", "CE", "https://kauai.ccmc.gsfc.nasa.gov/DONKI/WS/get/CME", "startDate", "endDate", "Y-m-d", "NopTranslator");
-        $datasource->beginQuery($this->START_DATE, $this->LENGTH);
+        $datasource->beginQuery($this->START_DATE, $this->LENGTH, $this->START_DATE);
         $data = $datasource->getResult();
         // Normally the translator returns helioviewer groups, but in this case since we're using the NopTranslator it just returns the data as-is.
         // So in this case, "groups" is not actually helioviewer groups, it's just raw event data for the purpose of testing.
@@ -28,7 +28,7 @@ final class DataSourceTest extends TestCase
     public function testDonkiCme(): void
     {
         $datasource = new JsonDataSource("Donki", "CME", "CE", "https://kauai.ccmc.gsfc.nasa.gov/DONKI/WS/get/CME", "startDate", "endDate", "Y-m-d", "DonkiCme");
-        $datasource->beginQuery($this->START_DATE, $this->LENGTH);
+        $datasource->beginQuery($this->START_DATE, $this->LENGTH, $this->START_DATE);
         $data = $datasource->getResult();
         // Here it runs through the DonkiCme translator, so it should actually be in the correct event format.
         $totalItems = array_reduce($data['groups'], function ($total, $group) {$total += count($group['data']); return $total;}, 0);
@@ -40,7 +40,7 @@ final class DataSourceTest extends TestCase
         $end = new DateInterval("P0D");
 
         $datasource = new JsonDataSource("Donki", "CME", "CE", "https://kauai.ccmc.gsfc.nasa.gov/DONKI/WS/get/CME", "startDate", "endDate", "Y-m-d", "DonkiCme");
-        $datasource->beginQuery($start, $end);
+        $datasource->beginQuery($start, $end, $start);
         $group = $datasource->getResult();
         $this->assertCount(1, $group['groups']);
         $this->assertCount(0, $group['groups'][0]['data']);
@@ -51,24 +51,27 @@ final class DataSourceTest extends TestCase
         $length = new DateInterval("P1D");
 
         $datasource = new JsonDataSource("Donki", "CME", "CE", "https://kauai.ccmc.gsfc.nasa.gov/DONKI/WS/get/CME", "startDate", "endDate", "Y-m-d", "DonkiCme");
-        $datasource->beginQuery($start, $length);
+        $datasource->beginQuery($start, $length, $start);
         $group = $datasource->getResult();
         // Now assert this result has been cached
         $key = $datasource->GetCacheKey($start, $length);
         $item = Cache::Get($key);
         $this->assertTrue($item->isHit());
-        $this->assertEquals($group, $item->get());
+
+        $datasource->beginQuery($start, $length, $start);
+        $group2 = $datasource->getResult();
+        $this->assertEquals($group, $group2);
     }
 
     public function testDateRounding(): void {
         $datasource = new JsonDataSource("Donki", "CME", "CE", "https://kauai.ccmc.gsfc.nasa.gov/DONKI/WS/get/CME", "startDate", "endDate", "Y-m-d", "DonkiCme");
         $roundDownStart = new DateTimeImmutable("2021-12-09T23:29:59Z");
         $length = new DateInterval("P1D");
-        $datasource->beginQuery($roundDownStart, $length);
+        $datasource->beginQuery($roundDownStart, $length, $roundDownStart);
         $downGroup = $datasource->getResult();
 
         $roundUpStart = new DateTimeImmutable("2021-12-09T23:30:00Z");
-        $datasource->beginQuery($roundUpStart, $length);
+        $datasource->beginQuery($roundUpStart, $length, $roundUpStart);
         $upGroup = $datasource->getResult();
         $this->assertNotEquals($downGroup, $upGroup);
     }

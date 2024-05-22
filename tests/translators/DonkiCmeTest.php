@@ -13,7 +13,7 @@ final class DonkiCmeTest extends TestCase
         $start = new DateTimeImmutable("2021-12-08T09:01:31Z");
         $end = new DateInterval("P1D");
 
-        $result = Events::GetFromSource(["DONKI"], $start, $end);
+        $result = Events::GetFromSource(["DONKI"], $start, $end, $start);
         $this->assertNotNull($result);
     }
 
@@ -27,7 +27,7 @@ final class DonkiCmeTest extends TestCase
     }
 
 
-    public function testShortLabelDefaultLabel(): void 
+    public function testShortLabelDefaultLabel(): void
     {
         $data["startTime"] = "2024-05-14T10:09Z";
         $data["sourceLocation"] = "2024-05-14T10:09Z";
@@ -37,7 +37,7 @@ final class DonkiCmeTest extends TestCase
         $this->assertEquals("2024-05-14 10:09:00", $donkiCme->shortLabel());
     }
 
-    public function testShortLabelWithModeled(): void 
+    public function testShortLabelWithModeled(): void
     {
         $data["startTime"] = "2024-05-14T10:09Z";
         $data["sourceLocation"] = "2024-05-14T10:09Z";
@@ -50,13 +50,13 @@ final class DonkiCmeTest extends TestCase
             'speed' => 'foo_speed',
             'enlilList' => [[
             ]],
-        ]]; 
+        ]];
 
         $donkiCme = new DonkiCme($data);
         $this->assertEquals("Type: foo_type foo_angle&deg; foo_speed km/s Modeled", $donkiCme->shortLabel());
     }
-        
-    public function testShortLabelWithoutModeled(): void 
+
+    public function testShortLabelWithoutModeled(): void
     {
         $data["startTime"] = "2024-05-14T10:09Z";
         $data["sourceLocation"] = "2024-05-14T10:09Z";
@@ -67,7 +67,7 @@ final class DonkiCmeTest extends TestCase
             'type' => 'foo_type',
             'halfAngle' => 'foo_angle',
             'speed' => 'foo_speed',
-        ]]; 
+        ]];
 
         $donkiCme = new DonkiCme($data);
         $this->assertEquals("Type: foo_type foo_angle&deg; foo_speed km/s", $donkiCme->shortLabel());

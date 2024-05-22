@@ -3,15 +3,17 @@
 namespace HelioviewerEventInterface\Translator;
 
 use DateTime;
+use DateTimeInterface;
 use HelioviewerEventInterface\Coordinator\Coordinator;
 use HelioviewerEventInterface\Types\HelioviewerEvent;
+use HelioviewerEventInterface\Util\Date;
 use HelioviewerEventInterface\Util\HapiRecord;
 
 const FLARE_CLASSES = ["C", "CPlus", "M", "MPlus", "X"];
 
 class FlarePrediction {
 
-    public static function Translate(array $data, string $method, ?callable $postProcessor): array {
+    public static function Translate(array $data, string $method): array {
         $groups = [
             [
                 'name' => $method,
@@ -50,23 +52,36 @@ class FlarePrediction {
                 'content' => $event->source]
             ];
             $lat = GetLatitude($prediction);
-            $long = GetLongitude($prediction);
+            $lon = GetLongitude($prediction);
             $time = GetTime($prediction);
             // If there's no positional information, then skip this entry.
-            if (is_null($lat) || is_null($long) || is_null($time)) {
+            if (is_null($lat) || is_null($lon) || is_null($time)) {
                 continue;
-            }
-            $hpc = Coordinator::Hgs2Hpc(GetLatitude($prediction), GetLongitude($prediction), GetTime($prediction));
-            $event->hv_hpc_x = $hpc['x'];
-            $event->hv_hpc_y = $hpc['y'];
-            if ($postProcessor) {
-                $event = $postProcessor($event);
             }
             array_push($result, (array) $event);
         }
         return $groups;
     }
 
+    public static function Transform(array $events, DateTimeInterface $obstime): array {
+        $observation_time = Date::FormatDate($obstime);
+        foreach ($events['groups'] as &$group) {
+            // $group:
+            // array('name', 'contact', 'url', 'data')
+            foreach ($group['data'] as &$event) {
+                // event:
+                // array of HelioviewerEvent fields
+                $prediction = $event['source'];
+                $lat = GetLatitude($prediction);
+                $lon = GetLongitude($prediction);
+                $time = GetTime($prediction);
+                $coord = Coordinator::Hgs2Hpc($lat, $lon, $time, $observation_time);
+                $event['hv_hpc_x'] = $coord['x'];
+                $event['hv_hpc_y'] = $coord['y'];
+            }
+        }
+        return $events;
+    }
 }
 
 
@@ -159,14 +174,14 @@ function GetProbablity(HapiRecord $prediction, string $flare_class): ?string {
     return null;
 }
 
-function GetLatitude(HapiRecord $prediction): mixed {
+function GetLatitude(mixed $prediction): mixed {
     return $prediction['NOAALatitude'] ?? $prediction['CataniaLatitude'] ?? $prediction['ModelLatitude'];
 }
 
-function GetLongitude(HapiRecord $prediction): mixed {
+function GetLongitude(mixed $prediction): mixed {
     return $prediction['NOAALongitude'] ?? $prediction['CataniaLongitude'] ?? $prediction['ModelLongitude'];
 }
 
-function GetTime(HapiRecord $prediction): mixed {
+function GetTime(mixed $prediction): mixed {
     return $prediction['NOAALocationTime'] ?? $prediction['CataniaLocationTime'] ?? $prediction['ModelLocationTime'] ?? $prediction['issue_time'];
 }

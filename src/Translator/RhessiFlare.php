@@ -67,9 +67,6 @@ class RhessiFlare {
         return false;
     }
 
-    public function id() { return $this->data[0]; }
-
-
     public function asMappedArray(): array {
         // clone the data
         $data = unserialize(serialize($this->data));
@@ -113,9 +110,6 @@ class RhessiFlare {
         $event->end = Date::FormatDate($this->data["end"]);
         $event->source = $this->data;
         $event->views = $this->views();
-        $coord = Coordinator::HPC(floatval($this->data["xloc"]), floatval($this->data["yloc"]), Date::FormatDate($this->data["peak"]));
-        $event->hv_hpc_x = $coord['x'];
-        $event->hv_hpc_y = $coord['y'];
         $event->link = $this->link();
         return $event;
     }
@@ -135,7 +129,7 @@ class RhessiFlare {
      * @param string $csv the contents of the csv flare list
      * @param array $extra Array with the following keys: offset => int, start => DateTimeInterface, length => DateInterval
      */
-    public static function Translate(string $csv, mixed $extra, ?callable $postprocessor): array {
+    public static function Translate(string $csv, mixed $extra): array {
         // $extra must have certain keys for the RhessiFlare translator
         // offset - The start of the data within the csv file
         // start - A DateTime instance representing an endpoint of the query range.
@@ -168,9 +162,6 @@ class RhessiFlare {
             $flare = new RhessiFlare($data);
             if ($flare->withinRange($extra['start'], $extra['length'])) {
                 $event = $flare->asEvent();
-                if (isset($postprocessor)) {
-                    $event = $postprocessor($event);
-                }
                 $saved += 1;
                 array_push($groups[0]['data'], (array) $event);
             } else if ($flare->isAfterRange($extra['start'], $extra['length'])) {
@@ -186,5 +177,29 @@ class RhessiFlare {
             "pin"  => "F2",
             "groups" => $groups
         ];
+    }
+
+    /**
+     * Transform all event coordinates to the given observation time.
+     * @param array $events Events returned by the Translate function.
+     * @param DateTimeInterface $obstime Desired helioviewer observation time.
+     */
+    public static function Transform(array $events, DateTimeInterface $obstime) {
+        $observation_time = Date::FormatDate($obstime);
+        foreach ($events['groups'] as &$group) {
+            // $group:
+            // array('name', 'contact', 'url', 'data')
+            foreach ($group['data'] as &$event) {
+                // event:
+                // array of HelioviewerEvent fields
+                $event_time = Date::FormatDate($event['source']['peak']);
+                $event_x = floatval($event['source']['xloc']);
+                $event_y = floatval($event['source']['yloc']);
+                $coord = Coordinator::HPC($event_x, $event_y, $event_time, $observation_time);
+                $event['hv_hpc_x'] = $coord['x'];
+                $event['hv_hpc_y'] = $coord['y'];
+            }
+        }
+        return $events;
     }
 }

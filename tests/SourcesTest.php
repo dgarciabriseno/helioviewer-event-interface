@@ -56,7 +56,7 @@ final class SourcesTest extends TestCase
     public function testInvalidLocation(): void {
         $start = new DateTime("2021-12-09T23:01:53Z");
         $interval = new DateInterval("P1D");
-        Events::GetAll($start, $interval);
+        Events::GetAll($start, $interval, $start);
     }
 }
 

@@ -40,6 +40,7 @@ data sources:
 |-----------|-------------|
 | GetClient | Returns a guzzle http client which can be used to send async requests |
 | Translate | Runs the designated translator on the given data |
+| Tranform  | Runs the designated coordinate transformations on the given data |
 
 
 ## Guidelines
@@ -73,7 +74,7 @@ block this process.
 
 1. Check if requested range is already cached
 2. If cache hit, then do nothing!
-3. If cache miss, schedule asynchronous request
+3. If cache miss, schedule asynchronous request which returns translated data.
 
 <details>
 <summary>Reference Code</summary>
@@ -110,11 +111,12 @@ then simply return the cached data. If you are performing a synchronous request,
 then that should be done here. Otherwise, complete the asynchronous request,
 store the processed data in the cache, and return the results.
 
-1. If cache hit, return data from cache
+1. If cache hit, get data from cache
 2. If cache miss, wait for http request to complete
 3. Perform any final processing
 4. Cache data
-5. return data
+5. Transform data coordinates to observation time
+6. return data
 
 <details>
 <summary>Code Reference</summary>
@@ -122,7 +124,8 @@ store the processed data in the cache, and return the results.
 ```php
 // Assume you stored the results of Cache::Get into $this->cache
 if ($this->cache && $this->cache->isHit()) {
-    return $this->cache->get();
+    $data = $this->cache->get();
+    return $this->Transform($data, $this->observation_time);
 }
 
 // Cache miss.
@@ -130,7 +133,7 @@ if ($this->cache && $this->cache->isHit()) {
 $data = $this->request->wait();
 // Save data to the cache for future requests
 Cache::Set($this->cache->getKey(), Cache::DefaultExpiry(params), $data);
-return $data;
+return $this->Transform($data, $this->observation_time);
 ```
 
 </details>

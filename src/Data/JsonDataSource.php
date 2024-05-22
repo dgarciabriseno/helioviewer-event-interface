@@ -24,6 +24,8 @@ class JsonDataSource extends DataSource {
     protected ?array $queryParameters;
     protected mixed  $extra;
     protected DateInterval $cacheExpiry;
+    /** Desired observation time to use for coordinate transformations */
+    protected DateTimeInterface $obstime;
     private ?CacheItemInterface $cache = null;
     private PromiseInterface $request;
 
@@ -66,16 +68,18 @@ class JsonDataSource extends DataSource {
      * Use getResult() to get the response from the last query.
      * @param DateTimeInterface $start Start of time range
      * @param DateInterval $length Length of time to query
-     * @param callable $postprocessor Executable function to call on each Helioviewer Event processed during the query
+     * @param DateTimeInterface $obstime Observation time, used to transform event coordinates to the position as
+     *                                   seen by Helioviewer at this time.
      * @return PromiseInterface
      */
-    public function beginQuery(DateTimeInterface $start, DateInterval $length, ?callable $postprocessor = null) {
+    public function beginQuery(DateTimeInterface $start, DateInterval $length, DateTimeInterface $obstime) {
         $roundedDateTime = Cache::RoundDate($start);
         $this->cache = Cache::Get($this->GetCacheKey($roundedDateTime, $length));
         $this->cacheExpiry = Cache::DefaultExpiry($roundedDateTime);
+        $this->obstime = $obstime;
         // Only send the request on cache miss
         if (!$this->cache->isHit()) {
-            $this->sendAsyncQuery($roundedDateTime, $length, $postprocessor);
+            $this->sendAsyncQuery($roundedDateTime, $length);
         }
     }
 
@@ -84,10 +88,9 @@ class JsonDataSource extends DataSource {
      * Use getResult() to get the response from the last query.
      * @param DateTimeInterface $start Start of time range
      * @param DateInterval $length Length of time to query
-     * @param callable $postprocessor Executable function to call on each Helioviewer Event processed during the query
      * @return PromiseInterface
      */
-    private function sendAsyncQuery(DateTimeInterface $start, DateInterval $length, ?callable $postprocessor = null) {
+    private function sendAsyncQuery(DateTimeInterface $start, DateInterval $length) {
         // Convert input dates to strings
         $endString = $start->format($this->dateFormat);
         $startDate = DateTimeImmutable::createFromInterface($start);
@@ -103,10 +106,10 @@ class JsonDataSource extends DataSource {
         $extra = $this->extra;
         $this->request = $promise->then(
             // Decode the json result on a successful request
-            function (ResponseInterface $response) use ($postprocessor, $extra) {
+            function (ResponseInterface $response) use ($extra) {
                 $data = json_decode($response->getBody()->getContents(), true);
                 if (isset($data)) {
-                    return $this->Translate($data, $extra, $postprocessor);
+                    return $this->Translate($data, $extra);
                 } else {
                     // If data is null, then there's no data for the query, return an empty list.
                     return [];
@@ -127,7 +130,8 @@ class JsonDataSource extends DataSource {
     public function getResult(): array {
         // Check for the cached value and return it on a cache hit.
         if (isset($this->cache) && $this->cache->isHit()) {
-            return $this->cache->get();
+            $data = $this->cache->get();
+            return $this->Transform($data, $this->obstime);
         }
 
         if (isset($this->request)) {
@@ -136,7 +140,7 @@ class JsonDataSource extends DataSource {
             // Cache item must be set during beginQuery even if its a cache miss.
             $key = $this->cache->getKey();
             Cache::Set($key, $this->cacheExpiry, $result);
-            return $result;
+            return $this->Transform($result, $this->obstime);
         }
         error_log("Attempted to get the result without calling beginQuery");
         return $this->BuildEventCategory(null);
