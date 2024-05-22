@@ -49,7 +49,7 @@ final class CsvDataSourceTest extends TestCase
         $ds->beginQuery(
             new DateTime("2012-02-12 00:00:00"),
             new DateInterval("P1D"),
-            null
+            new DateTime("2012-02-12 00:00:00")
         );
         $ds->getResult();
     }
@@ -58,7 +58,8 @@ final class CsvDataSourceTest extends TestCase
         $source = $this->getRemoteTestDataSource("RhessiFlare");
         $source->beginQuery(
             new DateTime("2012-02-22 00:00:00"),
-            new DateInterval("P1D")
+            new DateInterval("P1D"),
+            new DateTime("2012-02-12 00:00:00")
         );
         $data = $source->getResult();
         $this->assertCount(3, $data);
@@ -69,7 +70,8 @@ final class CsvDataSourceTest extends TestCase
         $source = $this->getLocalTestDataSource("RhessiFlare");
         $source->beginQuery(
             new DateTime("2012-02-22 00:00:00"),
-            new DateInterval("P1D")
+            new DateInterval("P1D"),
+            new DateTime("2012-02-22 00:00:00")
         );
         $data = $source->getResult();
         // Expect to find 4 flares for the given time range
