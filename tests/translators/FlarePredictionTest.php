@@ -12,7 +12,7 @@ final class FlarePredictionTest extends TestCase
     {
         $start = new DateTimeImmutable();
         $length = new DateInterval("P2D");
-        $result = Events::GetFromSource(["CCMC"], $start, $length);
+        $result = Events::GetFromSource(["CCMC"], $start, $length, $start);
         $count = 0;
         foreach ($result as $section) {
             foreach ($section['groups'] as $group) {
