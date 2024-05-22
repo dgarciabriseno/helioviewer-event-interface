@@ -187,7 +187,7 @@ class RhessiFlare {
      * @param array $events Events returned by the Translate function.
      * @param DateTimeInterface $obstime Desired helioviewer observation time.
      */
-    public static function Transform(array &$events, DateTimeInterface $obstime) {
+    public static function Transform(array $events, DateTimeInterface $obstime) {
         $observation_time = Date::FormatDate($obstime);
         foreach ($events['groups'] as &$group) {
             // $group:
@@ -201,8 +201,8 @@ class RhessiFlare {
                 $coord = Coordinator::HPC($event_x, $event_y, $event_time, $observation_time);
                 $event['hv_hpc_x'] = $coord['x'];
                 $event['hv_hpc_y'] = $coord['y'];
-                var_dump($event);
             }
         }
+        return $events;
     }
 }

@@ -108,7 +108,7 @@ class CsvDataSource extends DataSource {
         $csv = file_get_contents(str_replace("file://", "", $this->uri));
         $data = $this->Translate($csv, $this->extra);
         Cache::Set($this->cache->getKey(), new DateInterval("P100Y"), $data);
-        return $data;
+        return $this->Transform($data, $this->obstime);
     }
 
     /**
@@ -119,7 +119,8 @@ class CsvDataSource extends DataSource {
     {
         // If cache hit, then return cached data
         if (isset($this->cache) && $this->cache->isHit()) {
-            return $this->cache->get();
+            $data = $this->cache->get();
+            return $this->Transform($data, $this->obstime);
         }
 
         // If performing a remote request, complete it here.
@@ -128,7 +129,7 @@ class CsvDataSource extends DataSource {
             Cache::Set($this->cache->getKey(), new DateInterval("P100Y"), $data);
             // Since the whole CSV is loaded, the results have to be filtered down
             // to the desired query range
-            return $data;
+            return $this->Transform($data, $this->obstime);
         }
 
         // Lastly, it's not a remote request, so load the csv from disk here.
