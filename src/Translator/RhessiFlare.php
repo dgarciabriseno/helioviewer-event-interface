@@ -113,9 +113,6 @@ class RhessiFlare {
         $event->end = Date::FormatDate($this->data["end"]);
         $event->source = $this->data;
         $event->views = $this->views();
-        $coord = Coordinator::HPC(floatval($this->data["xloc"]), floatval($this->data["yloc"]), Date::FormatDate($this->data["peak"]));
-        $event->hv_hpc_x = $coord['x'];
-        $event->hv_hpc_y = $coord['y'];
         $event->link = $this->link();
         return $event;
     }
@@ -183,5 +180,29 @@ class RhessiFlare {
             "pin"  => "F2",
             "groups" => $groups
         ];
+    }
+
+    /**
+     * Transform all event coordinates to the given observation time.
+     * @param array $events Events returned by the Translate function.
+     * @param DateTimeInterface $obstime Desired helioviewer observation time.
+     */
+    public static function Transform(array &$events, DateTimeInterface $obstime) {
+        $observation_time = Date::FormatDate($obstime);
+        foreach ($events['groups'] as &$group) {
+            // $group:
+            // array('name', 'contact', 'url', 'data')
+            foreach ($group['data'] as &$event) {
+                // event:
+                // array of HelioviewerEvent fields
+                $event_time = Date::FormatDate($event['source']['peak']);
+                $event_x = floatval($event['source']['xloc']);
+                $event_y = floatval($event['source']['yloc']);
+                $coord = Coordinator::HPC($event_x, $event_y, $event_time, $observation_time);
+                $event['hv_hpc_x'] = $coord['x'];
+                $event['hv_hpc_y'] = $coord['y'];
+                var_dump($event);
+            }
+        }
     }
 }

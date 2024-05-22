@@ -28,9 +28,20 @@ final class RhessiFlareTest extends TestCase
 
         $rhessi_event = $rhessi_flare->asEvent();
 
-        $this->assertEqualsWithDelta(-897.7240, $rhessi_event->hv_hpc_x, 0.0001);
-        $this->assertEqualsWithDelta(-353.8028, $rhessi_event->hv_hpc_y, 0.0001);
+        $event_data = [
+            'groups' => [
+                array('data' => [(array) $rhessi_event])
+            ]
+        ];
+
+        RhessiFlare::Transform($event_data, new DateTime('2012-07-05 03:29:06'));
+        $event = $event_data['groups'][0]['data'][0];
+
+        $this->assertEqualsWithDelta(-897.7240, $event['hv_hpc_x'], 0.0001);
+        $this->assertEqualsWithDelta(-353.8028, $event['hv_hpc_y'], 0.0001);
     }
 
+    public function testQueryRhessiEvents() {
+    }
 }
 
