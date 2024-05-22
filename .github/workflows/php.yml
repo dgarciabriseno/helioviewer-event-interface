@@ -30,7 +30,7 @@ jobs:
           # Maps port 6379 on service container to the host
           - 6379:6379
       coordinator:
-        image: dgarciabriseno/hv-coordinator
+        image: dgarciabriseno/hv-coordinator:0.1.0
         ports:
           - 9000:80
         options: >-
