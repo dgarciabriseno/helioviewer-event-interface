@@ -4,6 +4,7 @@ namespace HelioviewerEventInterface\Translator;
 
 use \DateInterval;
 use \DateTimeImmutable;
+use DateTimeInterface;
 use \Exception;
 use \Throwable;
 use HelioviewerEventInterface\Types\HelioviewerEvent;
@@ -20,7 +21,6 @@ function TranslateCME(array $record): array {
     $start = new DateTimeImmutable($record['startTime']);
     $end = $start->add(new DateInterval("P1D"));
     $cme = new DonkiCme($record);
-    $hpc = Coordinator::Hgs2Hpc($cme->latitude, $cme->longitude, $start->format('Y-m-d\TH:i:s\Z'));
 
     $event = new HelioviewerEvent();
     $event->id      = $record['activityID'];
@@ -30,10 +30,11 @@ function TranslateCME(array $record): array {
     $event->type    = 'CE';
     $event->start   = $start->format('Y-m-d H:i:s');
     $event->end     = $end->format('Y-m-d H:i:s');
-    $event->hv_hpc_x   = $hpc['x'];
-    $event->hv_hpc_y   = $hpc['y'];
     $event->link    = $cme->link();
     $event->views   = $cme->views();
+    // coordinates will be updated during the transform step
+    $event->hv_hpc_x = $cme->latitude;
+    $event->hv_hpc_y = $cme->longitude;
 
     $event->source = $record;
     return (array) $event;
@@ -316,6 +317,25 @@ class DonkiCme {
             }
         }
         return array_values($groups);
+    }
+
+    public static function Transform(array $events, DateTimeInterface $obstime): array {
+        $observation_time = Date::FormatDate($obstime);
+        foreach ($events['groups'] as &$group) {
+            // $group:
+            // array('name', 'contact', 'url', 'data')
+            foreach ($group['data'] as &$event) {
+                // event:
+                // array of HelioviewerEvent fields
+                $lat = $event['hv_hpc_x'];
+                $lon = $event['hv_hpc_y'];
+                $time = $event['start'];
+                $coord = Coordinator::Hgs2Hpc($lat, $lon, $time, $observation_time);
+                $event['hv_hpc_x'] = $coord['x'];
+                $event['hv_hpc_y'] = $coord['y'];
+            }
+        }
+        return $events;
     }
 }
 
