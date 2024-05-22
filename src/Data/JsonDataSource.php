@@ -109,7 +109,7 @@ class JsonDataSource extends DataSource {
             function (ResponseInterface $response) use ($extra) {
                 $data = json_decode($response->getBody()->getContents(), true);
                 if (isset($data)) {
-                    return $this->Translate($data, $this->obstime, $extra);
+                    return $this->Translate($data, $extra);
                 } else {
                     // If data is null, then there's no data for the query, return an empty list.
                     return [];
