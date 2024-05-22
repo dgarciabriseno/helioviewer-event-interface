@@ -33,6 +33,9 @@ class CsvDataSource extends DataSource {
     /** Extra data to send to the translator */
     private array $extra;
 
+    /** Desired observation time to use for coordinate transformations */
+    private DateTimeInterface $obstime;
+
     /**
      * Construct a csv data source
      * @param string $source Unique name of the data source
@@ -52,15 +55,18 @@ class CsvDataSource extends DataSource {
      * Loads the csv into the memory, either from the source or cache
      * @param DateTimeInterface $start Start of time range
      * @param DateInterval $length Length of time to query
+     * @param DateTimeInterface $obstime Observation time, used to transform event coordinates to the position as
+     *                                   seen by Helioviewer at this time.
      * @return PromiseInterface
      */
-    public function beginQuery(DateTimeInterface $start, DateInterval $length)
+    public function beginQuery(DateTimeInterface $start, DateInterval $length, DateTimeInterface $obstime)
     {
         // Store the query results so they can be used later. The whole csv is
         // cached, so these parameters aren't used in the query, but will be
         // used to filter the data in getResult.
         $this->extra["start"] = $start;
         $this->extra["length"] = $length;
+        $this->obstime = $obstime;
 
         $this->cache = Cache::Get($this->GetCacheKey($start, $length));
         // Do nothing on cache hit.
@@ -85,7 +91,7 @@ class CsvDataSource extends DataSource {
         $promise = $client->requestAsync("GET", $this->uri);
         $this->request = $promise->then(function (ResponseInterface $response) {
                 if ($response->getStatusCode() == 200) {
-                    return $this->Translate($response->getBody()->getContents(), $this->extra);
+                    return $this->Translate($response->getBody()->getContents(), $this->obstime, $this->extra);
                 } else {
                     return [];
                 }
@@ -100,7 +106,7 @@ class CsvDataSource extends DataSource {
 
     private function _LoadLocalCsv(): array {
         $csv = file_get_contents(str_replace("file://", "", $this->uri));
-        $data = $this->Translate($csv, $this->extra);
+        $data = $this->Translate($csv, $this->obstime, $this->extra);
         Cache::Set($this->cache->getKey(), new DateInterval("P100Y"), $data);
         return $this->_filterResults($data);
     }

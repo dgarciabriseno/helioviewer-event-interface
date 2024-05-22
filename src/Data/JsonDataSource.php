@@ -24,6 +24,8 @@ class JsonDataSource extends DataSource {
     protected ?array $queryParameters;
     protected mixed  $extra;
     protected DateInterval $cacheExpiry;
+    /** Desired observation time to use for coordinate transformations */
+    protected DateTimeInterface $obstime;
     private ?CacheItemInterface $cache = null;
     private PromiseInterface $request;
 
@@ -66,12 +68,15 @@ class JsonDataSource extends DataSource {
      * Use getResult() to get the response from the last query.
      * @param DateTimeInterface $start Start of time range
      * @param DateInterval $length Length of time to query
+     * @param DateTimeInterface $obstime Observation time, used to transform event coordinates to the position as
+     *                                   seen by Helioviewer at this time.
      * @return PromiseInterface
      */
-    public function beginQuery(DateTimeInterface $start, DateInterval $length) {
+    public function beginQuery(DateTimeInterface $start, DateInterval $length, DateTimeInterface $obstime) {
         $roundedDateTime = Cache::RoundDate($start);
         $this->cache = Cache::Get($this->GetCacheKey($roundedDateTime, $length));
         $this->cacheExpiry = Cache::DefaultExpiry($roundedDateTime);
+        $this->obstime = $obstime;
         // Only send the request on cache miss
         if (!$this->cache->isHit()) {
             $this->sendAsyncQuery($roundedDateTime, $length);
@@ -104,7 +109,7 @@ class JsonDataSource extends DataSource {
             function (ResponseInterface $response) use ($extra) {
                 $data = json_decode($response->getBody()->getContents(), true);
                 if (isset($data)) {
-                    return $this->Translate($data, $extra);
+                    return $this->Translate($data, $this->obstime, $extra);
                 } else {
                     // If data is null, then there's no data for the query, return an empty list.
                     return [];

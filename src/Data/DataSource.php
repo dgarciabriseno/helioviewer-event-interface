@@ -38,9 +38,11 @@ abstract class DataSource {
      * Use getResult() to get the response from the last query.
      * @param DateTimeInterface $start Start of time range
      * @param DateInterval $length Length of time to query
+     * @param DateTimeInterface $obstime Observation time, used to transform event coordinates to the position as
+     *                                   seen by Helioviewer at this time.
      * @return PromiseInterface
      */
-    abstract public function beginQuery(DateTimeInterface $start, DateInterval $length);
+    abstract public function beginQuery(DateTimeInterface $start, DateInterval $length, DateTimeInterface $obstime);
 
     /**
      * Returns the result from the last query started with beginQuery
