@@ -130,7 +130,8 @@ class JsonDataSource extends DataSource {
     public function getResult(): array {
         // Check for the cached value and return it on a cache hit.
         if (isset($this->cache) && $this->cache->isHit()) {
-            return $this->cache->get();
+            $data = $this->cache->get();
+            return $this->Transform($data, $this->obstime);
         }
 
         if (isset($this->request)) {
@@ -139,7 +140,7 @@ class JsonDataSource extends DataSource {
             // Cache item must be set during beginQuery even if its a cache miss.
             $key = $this->cache->getKey();
             Cache::Set($key, $this->cacheExpiry, $result);
-            return $result;
+            return $this->Transform($result, $this->obstime);
         }
         error_log("Attempted to get the result without calling beginQuery");
         return $this->BuildEventCategory(null);
