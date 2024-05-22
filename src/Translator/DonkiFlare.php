@@ -3,6 +3,7 @@
 namespace HelioviewerEventInterface\Translator;
 
 use \DateTime;
+use \DateTimeInterface;
 use HelioviewerEventInterface\Coordinator\Coordinator;
 use HelioviewerEventInterface\Types\EventLink;
 use HelioviewerEventInterface\Types\HelioviewerEvent;
@@ -146,4 +147,20 @@ class DonkiFlare {
         return $groups;
     }
 
+    public static function Transform(array $events, DateTimeInterface $obstime): array {
+        $observation_time = Date::FormatDate($obstime);
+        foreach ($events['groups'] as &$group) {
+            // $group:
+            // array('name', 'contact', 'url', 'data')
+            foreach ($group['data'] as &$event) {
+                // event:
+                // array of HelioviewerEvent fields
+                $location = LocationParser::ParseText($event['source']['sourceLocation']);
+                $coord = Coordinator::Hgs2Hpc($location[0], $location[1], $event['source']['peakTime'], $observation_time);
+                $event['hv_hpc_x'] = $coord['x'];
+                $event['hv_hpc_y'] = $coord['y'];
+            }
+        }
+        return $events;
+    }
 }
