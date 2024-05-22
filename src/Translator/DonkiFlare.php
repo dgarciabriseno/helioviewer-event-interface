@@ -33,12 +33,6 @@ class DonkiFlare {
         }
     }
 
-    public function hpc(): array {
-        $location = LocationParser::ParseText($this->flare['sourceLocation']);
-        $value = Coordinator::Hgs2Hpc($location[0], $location[1], $this->peak()->format('Y-m-d\TH:i:s\Z'));
-        return [$value['x'], $value['y']];
-    }
-
     public function instruments(): string {
         $instruments = $this->flare['instruments'];
         $obs = array();
@@ -140,7 +134,6 @@ class DonkiFlare {
             $event->end = $flare->end();
             $event->source = $flare->flare;
             $event->views = $flare->views();
-            list($event->hv_hpc_x, $event->hv_hpc_y) = $flare->hpc();
             $event->link = $flare->link();
             array_push($data, (array) $event);
         }

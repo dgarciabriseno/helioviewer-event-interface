@@ -67,9 +67,6 @@ class RhessiFlare {
         return false;
     }
 
-    public function id() { return $this->data[0]; }
-
-
     public function asMappedArray(): array {
         // clone the data
         $data = unserialize(serialize($this->data));
