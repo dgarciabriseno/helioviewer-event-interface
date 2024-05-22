@@ -57,7 +57,10 @@ final class DataSourceTest extends TestCase
         $key = $datasource->GetCacheKey($start, $length);
         $item = Cache::Get($key);
         $this->assertTrue($item->isHit());
-        $this->assertEquals($group, $item->get());
+
+        $datasource->beginQuery($start, $length, $start);
+        $group2 = $datasource->getResult();
+        $this->assertEquals($group, $group2);
     }
 
     public function testDateRounding(): void {

@@ -23,7 +23,7 @@ final class EventsTest extends TestCase
      */
     public function testGetEvents(): void
     {
-        $result = Events::GetFromSource(["DONKI"], $this->START_DATE, $this->LENGTH);
+        $result = Events::GetFromSource(["DONKI"], $this->START_DATE, $this->LENGTH, $this->START_DATE);
         $this->assertTrue(is_array($result));
         $this->assertEquals(1, count($result));
         $this->assertTrue(array_key_exists('groups', $result[0]));
@@ -33,7 +33,7 @@ final class EventsTest extends TestCase
      * Verifies that even if a source is given that doesn't exist, nothing will crash
      */
     public function testGetNothingFromSource(): void {
-        $emptySet = Events::GetFromSource(["beep beep"], $this->START_DATE, $this->LENGTH);
+        $emptySet = Events::GetFromSource(["beep beep"], $this->START_DATE, $this->LENGTH, $this->START_DATE);
         $this->assertIsArray($emptySet);
         $this->assertEmpty($emptySet);
     }
@@ -42,7 +42,7 @@ final class EventsTest extends TestCase
      * Verifies that even if a source is given that doesn't exist, nothing will crash
      */
     public function testGetFromSource(): void {
-        $data = Events::GetFromSource(["CCMC"], $this->START_DATE, $this->LENGTH);
+        $data = Events::GetFromSource(["CCMC"], $this->START_DATE, $this->LENGTH, $this->START_DATE);
         $this->assertTrue(is_array($data));
         $this->assertEquals(2, count($data));
         $this->assertTrue(array_key_exists('groups', $data[0]));
@@ -53,7 +53,7 @@ final class EventsTest extends TestCase
         $length = new DateInterval("P2D");
         $start = new DateTime();
         $start->sub($length);
-        Events::GetAll($start, $length);
+        Events::GetAll($start, $length, $start);
     }
 }
 

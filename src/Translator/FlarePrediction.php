@@ -51,8 +51,11 @@ class FlarePrediction {
                 ['name' => 'Flare Prediction',
                 'content' => $event->source]
             ];
+            $lat = GetLatitude($prediction);
+            $lon = GetLongitude($prediction);
+            $time = GetTime($prediction);
             // If there's no positional information, then skip this entry.
-            if (is_null($lat) || is_null($long) || is_null($time)) {
+            if (is_null($lat) || is_null($lon) || is_null($time)) {
                 continue;
             }
             array_push($result, (array) $event);
