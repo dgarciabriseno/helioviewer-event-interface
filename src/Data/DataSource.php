@@ -64,12 +64,12 @@ abstract class DataSource {
         return self::$HttpClient;
     }
 
-    protected function Translate(mixed $data, DateTimeInterface $obstime, mixed $extra = null): array {
+    protected function Translate(mixed $data, mixed $extra = null): array {
         if (is_null($this->translator)) {
             throw new Exception("Translator is null, you probably didn't call parent::__construct");
         }
 
         // Ah yes, indulge in string execution.
-        return "HelioviewerEventInterface\\Translator\\$this->translator::Translate"($data, $obstime, $extra);
+        return "HelioviewerEventInterface\\Translator\\$this->translator::Translate"($data, $extra);
     }
 }

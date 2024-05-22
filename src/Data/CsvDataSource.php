@@ -91,7 +91,7 @@ class CsvDataSource extends DataSource {
         $promise = $client->requestAsync("GET", $this->uri);
         $this->request = $promise->then(function (ResponseInterface $response) {
                 if ($response->getStatusCode() == 200) {
-                    return $this->Translate($response->getBody()->getContents(), $this->obstime, $this->extra);
+                    return $this->Translate($response->getBody()->getContents(), $this->extra);
                 } else {
                     return [];
                 }
@@ -106,7 +106,7 @@ class CsvDataSource extends DataSource {
 
     private function _LoadLocalCsv(): array {
         $csv = file_get_contents(str_replace("file://", "", $this->uri));
-        $data = $this->Translate($csv, $this->obstime, $this->extra);
+        $data = $this->Translate($csv, $this->extra);
         Cache::Set($this->cache->getKey(), new DateInterval("P100Y"), $data);
         return $data;
     }
