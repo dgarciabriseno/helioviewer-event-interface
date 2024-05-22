@@ -72,4 +72,20 @@ abstract class DataSource {
         // Ah yes, indulge in string execution.
         return "HelioviewerEventInterface\\Translator\\$this->translator::Translate"($data, $extra);
     }
+
+    /**
+     * Transforms coordinate positions for Helioviewer Event Interface events
+     * in the given data array
+     * @param array $data Event data returned by the translate function
+     * @param DateTimeInterface $obstime Helioviewer observation time
+     * @return array Data array with all event coordinates updated.
+     */
+    protected function Transform(array $data, DateTimeInterface $obstime): array {
+        if (is_null($this->translator)) {
+            throw new Exception("Translator is null, you probably didn't call parent::__construct");
+        }
+
+        return "HelioviewerEventInterface\\Translator\\$this->translator::Transform"($data, $obstime);
+    }
+
 }

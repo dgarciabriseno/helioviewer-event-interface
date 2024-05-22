@@ -40,6 +40,7 @@ data sources:
 |-----------|-------------|
 | GetClient | Returns a guzzle http client which can be used to send async requests |
 | Translate | Runs the designated translator on the given data |
+| Tranform  | Runs the designated coordinate transformations on the given data |
 
 
 ## Guidelines
