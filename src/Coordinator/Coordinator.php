@@ -2,7 +2,6 @@
 
 namespace HelioviewerEventInterface\Coordinator;
 
-use \Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Exception\ConnectException;
@@ -29,29 +28,30 @@ class Coordinator {
     /**
      * Transforms an HPC coordinate as seen from earth, to an HPC coordinate
      * inside Helioviewer's frame of reference
-     * @param $x X coordinate in arcseconds
-     * @param $y Y coordinate in arcseconds
-     * @param $obstime Observation time
+     * @param float $x X coordinate in arcseconds
+     * @param float $y Y coordinate in arcseconds
+     * @param string $event_time Time that the event was measured
+     * @param string $target Helioviewer observation time
      */
-    public static function HPC(float $x, float $y, string $obstime) {
-        $result = Coordinator::Get(HV_COORDINATOR_URL . "/hpc?x=" . $x . "&y=" . $y . "&obstime=" . urlencode($obstime));
+    public static function HPC(float $x, float $y, string $event_time, ?string $target = null) {
+        $target = $target ?? $event_time;
+        $result = Coordinator::Get(HV_COORDINATOR_URL . "/hpc?x=" . $x . "&y=" . $y . "&event_time=" . urlencode($event_time) . "&target=" . urlencode($target));
         $response = json_decode($result, true);
-        // The response format from the API is just x, y, but better to
-        // not make any assumptions. Handle the error here instead of
-        // on the client.
         return array("x" => $response["x"], "y" => $response["y"]);
     }
 
     /**
      * Converts latitude and longitude coordinates at
      * the given time to Helioprojective coordinates
+     * @param float $latitude Latitude coordinate
+     * @param float $longitude Longitude coordinate
+     * @param string $event_time Time that the event was measured
+     * @param string $target Helioviewer observation time
      */
-    public static function Hgs2Hpc(float $latitude, float $longitude, string $date) {
-        $result = Coordinator::Get(HV_COORDINATOR_URL . "/hgs2hpc?lat=" . $latitude . "&lon=" . $longitude . "&obstime=" . urlencode($date));
+    public static function Hgs2Hpc(float $latitude, float $longitude, string $event_time, ?string $target = null) {
+        $target = $target ?? $event_time;
+        $result = Coordinator::Get(HV_COORDINATOR_URL . "/hgs2hpc?lat=" . $latitude . "&lon=" . $longitude . "&event_time=" . urlencode($event_time) . "&target=" . urlencode($target));
         $response = json_decode($result, true);
-        // The response format from the API is just x, y, but better to
-        // not make any assumptions. Handle the error here instead of
-        // on the client.
         return array("x" => $response["x"], "y" => $response["y"]);
     }
 }
