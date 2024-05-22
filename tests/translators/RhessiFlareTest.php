@@ -34,7 +34,7 @@ final class RhessiFlareTest extends TestCase
             ]
         ];
 
-        RhessiFlare::Transform($event_data, new DateTime('2012-07-05 03:29:06'));
+        $event_data = RhessiFlare::Transform($event_data, new DateTime('2012-07-05 03:29:06'));
         $event = $event_data['groups'][0]['data'][0];
 
         $this->assertEqualsWithDelta(-897.7240, $event['hv_hpc_x'], 0.0001);
