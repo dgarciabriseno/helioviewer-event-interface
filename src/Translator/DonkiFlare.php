@@ -2,7 +2,9 @@
 
 namespace HelioviewerEventInterface\Translator;
 
+use \DateInterval;
 use \DateTime;
+use \DateTimeImmutable;
 use \DateTimeInterface;
 use HelioviewerEventInterface\Coordinator\Coordinator;
 use HelioviewerEventInterface\Types\EventLink;
@@ -51,7 +53,13 @@ class DonkiFlare {
     }
 
     public function end(): string {
-        return Date::FormatString($this->flare['endTime']);
+        if (is_null($this->flare['endTime'])) {
+            $start = new DateTimeImmutable($this->start());
+            $end = $start->add(new DateInterval('P1D'));
+            return Date::FormatDate($end);
+        }  else {
+            return Date::FormatString($this->flare['endTime']);
+        }
     }
 
     public function peak(): DateTime {
