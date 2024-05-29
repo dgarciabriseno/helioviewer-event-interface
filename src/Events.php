@@ -2,8 +2,9 @@
 
 namespace HelioviewerEventInterface;
 
-use DateInterval;
-use DateTimeInterface;
+use \DateInterval;
+use \DateTimeImmutable;
+use \DateTimeInterface;
 
 use HelioviewerEventInterface\Sources;
 
@@ -48,9 +49,14 @@ class Events
      *                                   seen by Helioviewer at this time.
      */
     private static function Get(DateTimeInterface $start, DateInterval $length, array $sources, DateTimeInterface $obstime): array {
+        // Begin asynchronous requests for event data
         $requests = Events::SendAsyncQueries($start, $length, $sources, $obstime);
+        // Wait for all requests to complete, and get all of their responses.
         $results = Events::WaitForCompletion($requests);
-        return Events::AggregateResults($results);
+        // Merge all the event data into the combined helioviewer event format.
+        $events = Events::AggregateResults($results);
+        // Filter events so only events within the observation time are returned.
+        return Events::FilterEvents($events, $obstime);
     }
 
     /**
@@ -106,5 +112,25 @@ class Events
             array_push($final_result, $category);
         }
         return $final_result;
+    }
+
+    /**
+     * Filters the given event data so only the events that contain the
+     * observation time are returned
+     * @param array $events Aggregated event data
+     * @param DateTimeInterface $obstime Observation time.
+     * @return array filtered events
+     */
+    private static function FilterEvents(array $events, DateTimeInterface $obstime): array {
+        foreach ($events as &$source) {
+            foreach ($source['groups'] as &$group) {
+                $group['data'] = array_filter($group['data'], function ($event) use ($obstime) {
+                    $start = new DateTimeImmutable($event['start']);
+                    $end = new DateTimeImmutable($event['end']);
+                    return ($start <= $obstime) && ($obstime <= $end);
+                });
+            }
+        }
+        return $events;
     }
 }
