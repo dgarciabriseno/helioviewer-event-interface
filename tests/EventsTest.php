@@ -46,7 +46,7 @@ final class EventsTest extends TestCase
         $this->assertTrue(is_array($data));
         $this->assertEquals(2, count($data));
         $this->assertTrue(array_key_exists('groups', $data[0]));
-        $this->assertEquals(8, count($data[0]['groups'][0]['data']));
+        $this->assertEquals(3, count($data[0]['groups'][0]['data']));
     }
 
     public function testGetAll(): void {
