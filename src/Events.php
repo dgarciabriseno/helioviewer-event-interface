@@ -124,11 +124,11 @@ class Events
     private static function FilterEvents(array $events, DateTimeInterface $obstime): array {
         foreach ($events as &$source) {
             foreach ($source['groups'] as &$group) {
-                $group['data'] = array_filter($group['data'], function ($event) use ($obstime) {
+                $group['data'] = array_values(array_filter($group['data'], function ($event) use ($obstime) {
                     $start = new DateTimeImmutable($event['start']);
                     $end = new DateTimeImmutable($event['end']);
                     return ($start <= $obstime) && ($obstime <= $end);
-                });
+                }));
             }
         }
         return $events;
