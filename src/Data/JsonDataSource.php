@@ -100,27 +100,29 @@ class JsonDataSource extends DataSource {
         $client = self::GetClient();
         // Define the request with the date range as query parameters
         $params = array_merge([$this->startName => $startString, $this->endName => $endString], $this->queryParameters ?? []);
-        $promise = $client->requestAsync('GET', $this->uri, [
-            'query' => $params
-        ]);
-        $extra = $this->extra;
-        $this->request = $promise->then(
-            // Decode the json result on a successful request
-            function (ResponseInterface $response) use ($extra) {
-                $data = json_decode($response->getBody()->getContents(), true);
-                if (isset($data)) {
-                    return $this->Translate($data, $extra);
-                } else {
-                    // If data is null, then there's no data for the query, return an empty list.
+        return Cache::GetWithLock($this->cache->getKey(), $this->cacheExpiry, function () use ($client, $params) {
+            $promise = $client->requestAsync('GET', $this->uri, [
+                'query' => $params
+            ]);
+            $extra = $this->extra;
+            $this->request = $promise->then(
+                // Decode the json result on a successful request
+                function (ResponseInterface $response) use ($extra) {
+                    $data = json_decode($response->getBody()->getContents(), true);
+                    if (isset($data)) {
+                        return $this->Translate($data, $extra);
+                    } else {
+                        // If data is null, then there's no data for the query, return an empty list.
+                        return [];
+                    }
+                },
+                // Fail gracefully on failure by logging the result and returning an empty list representing no data available from this source.
+                function (Exception $e) {
+                    error_log($e->getMessage());
                     return [];
                 }
-            },
-            // Fail gracefully on failure by logging the result and returning an empty list representing no data available from this source.
-            function (Exception $e) {
-                error_log($e->getMessage());
-                return [];
-            }
-        );
+            );
+        });
     }
 
     /**
