@@ -31,6 +31,10 @@ class Cache {
         return self::$CacheInstance;
     }
 
+    public static function InvalidateKey(string $key): void {
+        self::GetCacheInstance()->delete($key);
+    }
+
     public static function DefaultExpiry(DateTimeInterface $date): DateInterval {
         $one_week_ago = new DateTime();
         $one_week_ago->sub(new DateInterval('P1W'));

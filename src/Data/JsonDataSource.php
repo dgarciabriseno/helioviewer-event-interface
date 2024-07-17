@@ -90,7 +90,7 @@ class JsonDataSource extends DataSource {
      * @param DateInterval $length Length of time to query
      * @return PromiseInterface
      */
-    private function sendAsyncQuery(DateTimeInterface $start, DateInterval $length) {
+    private function sendAsyncQuery(DateTimeInterface $start, DateInterval $length): void {
         // Convert input dates to strings
         $endString = $start->format($this->dateFormat);
         $startDate = DateTimeImmutable::createFromInterface($start);
@@ -100,7 +100,7 @@ class JsonDataSource extends DataSource {
         $client = self::GetClient();
         // Define the request with the date range as query parameters
         $params = array_merge([$this->startName => $startString, $this->endName => $endString], $this->queryParameters ?? []);
-        return Cache::GetWithLock($this->cache->getKey(), $this->cacheExpiry, function () use ($client, $params) {
+        Cache::GetWithLock($this->cache->getKey(), $this->cacheExpiry, function () use ($client, $params) {
             $promise = $client->requestAsync('GET', $this->uri, [
                 'query' => $params
             ]);
@@ -130,22 +130,24 @@ class JsonDataSource extends DataSource {
      * This will block if the request is still ongoing.
      */
     public function getResult(): array {
+        $groups = [];
         // Check for the cached value and return it on a cache hit.
         if (isset($this->cache) && $this->cache->isHit()) {
-            $data = $this->cache->get();
-            return $this->Transform($data, $this->obstime);
+            $groups = $this->cache->get();
         }
 
         if (isset($this->request)) {
             $groups = $this->request->wait();
-            $result = $this->BuildEventCategory($groups);
-            // Cache item must be set during beginQuery even if its a cache miss.
-            $key = $this->cache->getKey();
-            Cache::Set($key, $this->cacheExpiry, $result);
-            return $this->Transform($result, $this->obstime);
         }
-        error_log("Attempted to get the result without calling beginQuery");
-        return $this->BuildEventCategory(null);
+
+        if (empty($groups)) {
+            Cache::InvalidateKey($this->cache->getKey());
+        } else if (isset($this->request)) {
+            Cache::Set($this->cache->getKey(), $this->cacheExpiry, $groups);
+        }
+
+        $result = $this->BuildEventCategory($groups);
+        return $this->Transform($result, $this->obstime);
     }
 
     private function BuildEventCategory(?array $groups): array {
