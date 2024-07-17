@@ -59,7 +59,10 @@ abstract class DataSource {
 
     protected static function GetClient(): Client {
         if (is_null(self::$HttpClient)) {
-            self::$HttpClient = new Client([]);
+            self::$HttpClient = new Client([
+                // Timeout at 10 seconds.
+                'timeout' => 10.0
+            ]);
         }
         return self::$HttpClient;
     }
