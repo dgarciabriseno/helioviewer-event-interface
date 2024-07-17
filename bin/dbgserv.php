@@ -12,9 +12,9 @@ $length = $_GET['length'] ?? 'P1D';
 $length = new DateInterval($length);
 
 if (isset($sources)) {
-    $data = Events::GetFromSource($sources, $startDate, $length, null);
+    $data = Events::GetFromSource($sources, $startDate, $length, $startDate);
 } else {
-    $data = Events::GetAll($startDate, $length);
+    $data = Events::GetAll($startDate, $length, $startDate);
 }
 header("Content-Type: application/json");
 echo json_encode($data);
