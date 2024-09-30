@@ -1,10 +1,12 @@
 <?php declare(strict_types=1);
 
 use HelioviewerEventInterface\Events;
+use HelioviewerEventInterface\Translator\FlarePrediction;
+use HelioviewerEventInterface\Util\Date;
 use PHPUnit\Framework\TestCase;
 use function HelioviewerEventInterface\Translator\CreateShortLabel;
 use HelioviewerEventInterface\Util\HapiRecord;
-
+use PHPUnit\TextUI\XmlConfiguration\Group;
 
 final class FlarePredictionTest extends TestCase
 {
@@ -170,6 +172,46 @@ final class FlarePredictionTest extends TestCase
         $hapi_record = new HapiRecord($record, $parameters, "");
 
         $this->assertEquals("\nC+: 5%\nM+: 1%\nX: 1%", CreateShortLabel($hapi_record));
+    }
+
+    static private function MakeEvent(float $lat, float $lon): array {
+        return [
+            'source' => [
+                'NOAALatitude' => $lat,
+                'NOAALongitude' => $lon,
+                'NOAALocationTime' => Date::FormatDate(new DateTimeImmutable()),
+                'issue_time' => new DateTimeImmutable(),
+            ]
+        ];
+    }
+
+    /**
+     * We've found that some CCMC Flare Scoreboard predictions have an invalid
+     * coordinate. The FlarePrediction translator filters these out.
+     * The FlarePrediction module now filters any records where the latitude
+     * and longitude are out of bounds.
+     */
+    #[Group('coordinator')]
+    public function testFlarePredictionInvalidCoordinates(): void {
+        $data = FlarePrediction::Transform([
+            'groups' => [[
+                'data' => [
+                    // Invalid coordinate
+                    self::MakeEvent(106, 130),
+                    // Edge cases out of bounds
+                    self::MakeEvent(90.01, 0),
+                    self::MakeEvent(-90.01, 0),
+                    self::MakeEvent(0, 180.01),
+                    self::MakeEvent(0, -180.01),
+                    // Edge cases in-bound
+                    self::MakeEvent(90, 180),
+                    self::MakeEvent(-90, -180),
+                ]
+            ]]
+        ], new DateTimeImmutable());
+        $this->assertCount(2, $data['groups'][0]['data']);
+        $this->assertArrayHasKey(0, $data['groups'][0]['data']);
+        $this->assertArrayHasKey(1, $data['groups'][0]['data']);
     }
 }
 
