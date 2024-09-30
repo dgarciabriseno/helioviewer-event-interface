@@ -73,9 +73,9 @@ class FlarePrediction {
             // We have identified that some predictions in CCMC have invalid
             // coordinates. In this case, we are going to drop these values
             // from the list.
-            $group['data'] = array_filter($group['data'], function ($event) {
+            $group['data'] = array_values(array_filter($group['data'], function ($event) {
                 return LocationParser::IsValidLatitudeLongitude(GetLatitude($event['source']), GetLongitude($event['source']));
-            });
+            }));
             foreach ($group['data'] as &$event) {
                 // event:
                 // array of HelioviewerEvent fields
