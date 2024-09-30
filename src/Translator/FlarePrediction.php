@@ -8,6 +8,7 @@ use HelioviewerEventInterface\Coordinator\Coordinator;
 use HelioviewerEventInterface\Types\HelioviewerEvent;
 use HelioviewerEventInterface\Util\Date;
 use HelioviewerEventInterface\Util\HapiRecord;
+use HelioviewerEventInterface\Util\LocationParser;
 
 const FLARE_CLASSES = ["C", "CPlus", "M", "MPlus", "X"];
 
@@ -68,6 +69,13 @@ class FlarePrediction {
         foreach ($events['groups'] as &$group) {
             // $group:
             // array('name', 'contact', 'url', 'data')
+
+            // We have identified that some predictions in CCMC have invalid
+            // coordinates. In this case, we are going to drop these values
+            // from the list.
+            $group['data'] = array_filter($group['data'], function ($event) {
+                return LocationParser::IsValidLatitudeLongitude(GetLatitude($event['source']), GetLongitude($event['source']));
+            });
             foreach ($group['data'] as &$event) {
                 // event:
                 // array of HelioviewerEvent fields

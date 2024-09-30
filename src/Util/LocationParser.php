@@ -20,4 +20,11 @@ class LocationParser
         $longitude = $east_west == "E" ? -$east_west_value : $east_west_value;
         return [$latitude, $longitude];
     }
+
+    /**
+     * Verifies that the latitude and longitude are valid coordinates
+     */
+    public static function IsValidLatitudeLongitude(float $lat, float $lon): bool {
+        return (-90 <= $lat && $lat <= 90) && (-180 <= $lon && $lon <= 180);
+    }
 }
