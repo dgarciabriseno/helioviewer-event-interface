@@ -35,7 +35,7 @@ class Coordinator {
      */
     public static function HPC(float $x, float $y, string $event_time, ?string $target = null) {
         $target = $target ?? $event_time;
-        $result = Coordinator::Get(HV_COORDINATOR_URL . "/hpc?x=" . $x . "&y=" . $y . "&event_time=" . urlencode($event_time) . "&target=" . urlencode($target));
+        $result = Coordinator::Get(HV_COORDINATOR_URL . "/hpc?x=" . $x . "&y=" . $y . "&coord_time=" . urlencode($event_time) . "&target=" . urlencode($target));
         $response = json_decode($result, true);
         return array("x" => $response["x"], "y" => $response["y"]);
     }
@@ -50,7 +50,7 @@ class Coordinator {
      */
     public static function Hgs2Hpc(float $latitude, float $longitude, string $event_time, ?string $target = null) {
         $target = $target ?? $event_time;
-        $result = Coordinator::Get(HV_COORDINATOR_URL . "/hgs2hpc?lat=" . $latitude . "&lon=" . $longitude . "&event_time=" . urlencode($event_time) . "&target=" . urlencode($target));
+        $result = Coordinator::Get(HV_COORDINATOR_URL . "/hgs2hpc?lat=" . $latitude . "&lon=" . $longitude . "&coord_time=" . urlencode($event_time) . "&target=" . urlencode($target));
         $response = json_decode($result, true);
         return array("x" => $response["x"], "y" => $response["y"]);
     }
